@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Ekalakala Ward — Angazake</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0d1117;--paper:#f9f7f2;--green:#1a6b3c;--green-light:#e8f4ed;--gold:#c8860a;--red:#c0392b;--muted:#6b7280;--border:#e2ddd6;--card:#ffffff;--radius:12px;--ward:#c8860a;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+nav{position:sticky;top:0;z-index:100;background:rgba(249,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5vw}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.nav-brand span{background:var(--green);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.8rem}
+.ward-selector{display:flex;gap:6px;flex-wrap:wrap}
+.ward-selector a{font-size:0.78rem;padding:5px 12px;border-radius:99px;text-decoration:none;border:1px solid var(--border);color:var(--muted);transition:all .2s;white-space:nowrap}
+.ward-selector a.active{background:var(--ward);color:#fff;border-color:var(--ward)}
+.ward-selector a:hover:not(.active){border-color:var(--ward);color:var(--ward)}
+.nav-back{font-size:0.82rem;color:var(--muted);text-decoration:none;flex-shrink:0;transition:color .2s}
+.nav-back:hover{color:var(--green)}
+.ward-hero{background:var(--ward);color:#fff;padding:56px 5vw 48px}
+.ward-hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center}
+.ward-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px}
+.ward-hero h1{font-family:'Sora',sans-serif;font-size:clamp(2rem,4vw,3rem);font-weight:800;line-height:1.1;margin-bottom:12px}
+.ward-hero p{color:rgba(255,255,255,0.75);font-size:0.95rem;max-width:480px}
+.ward-meta{margin-top:16px;display:flex;gap:16px;flex-wrap:wrap}
+.ward-meta span{font-size:0.85rem;color:rgba(255,255,255,0.7)}
+.mca-card{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius);padding:20px 24px;text-align:center;min-width:190px}
+.mca-avatar{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.2);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+.mca-name{font-family:'Sora',sans-serif;font-weight:700;font-size:0.92rem;color:#fff;margin-bottom:4px}
+.mca-title{font-size:0.73rem;color:rgba(255,255,255,0.6)}
+.stats-row{max-width:1200px;margin:-28px auto 0;padding:0 5vw;position:relative;z-index:10}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:0 4px 16px rgba(0,0,0,0.06)}
+.stat-num{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;color:var(--ward);line-height:1}
+.stat-label{font-size:0.78rem;color:var(--muted);margin-top:4px}
+section{padding:48px 5vw}
+.section-inner{max-width:1200px;margin:0 auto}
+.section-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ward);margin-bottom:8px}
+.section-title{font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:20px}
+.alt-bg{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.data-table-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+thead{background:var(--ink)}
+th{padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.7)}
+td{padding:13px 16px;border-bottom:1px solid var(--border);color:var(--ink)}
+tr:last-child td{border-bottom:none}tr:hover td{background:var(--paper)}
+.empty-state{padding:32px;text-align:center;color:var(--muted);font-size:0.88rem}
+.empty-state strong{display:block;color:var(--ink);margin-bottom:4px;font-size:0.92rem}
+.loading{color:var(--muted);font-style:italic}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:600}
+.s-complete,.s-approved,.s-disbursed{background:#dcfce7;color:#166534}
+.s-ongoing,.s-progress,.s-pending{background:#fef9c3;color:#854d0e}
+.s-stalled,.s-rejected{background:#fee2e2;color:#991b1b}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.project-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:box-shadow .2s}
+.project-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.08)}
+.project-cat{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ward);margin-bottom:8px}
+.project-name{font-weight:600;font-size:0.93rem;margin-bottom:8px;line-height:1.3}
+.project-meta{font-size:0.79rem;color:var(--muted);margin-bottom:3px}
+.progress-bar{height:6px;background:#e5e7eb;border-radius:99px;margin-top:10px;overflow:hidden}
+.progress-fill{height:100%;background:var(--ward);border-radius:99px}
+.ward-nav{max-width:1200px;margin:0 auto;padding:32px 5vw;display:flex;justify-content:space-between;align-items:center}
+.ward-nav a{text-decoration:none;color:var(--muted);font-size:0.88rem;display:flex;align-items:center;gap:6px;transition:color .2s}
+.ward-nav a:hover{color:var(--ward)}
+footer{background:var(--ink);color:#9ca3af;padding:32px 5vw}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:'Sora',sans-serif;font-weight:800;color:#fff;font-size:1rem}
+.footer-links a{font-size:0.82rem;color:#9ca3af;text-decoration:none;margin-left:20px;transition:color .2s}
+.footer-links a:hover{color:#fff}
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.ward-hero-inner{grid-template-columns:1fr}.mca-card{display:none}.ward-selector{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">💡 Angazake <span>PILOT</span></a>
+    <div class="ward-selector">
+      <a href="kivaa.html" >Kivaa</a>
+      <a href="masinga-central.html" >Masinga Central</a>
+      <a href="ndithini.html" >Ndithini</a>
+      <a href="ekalakala.html" class="active">Ekalakala</a>
+      <a href="muthesya.html" >Muthesya</a>
+    </div>
+    <a class="nav-back" href="index.html">← Home</a>
+  </div>
+</nav>
+
+<div class="ward-hero">
+  <div class="ward-hero-inner">
+    <div>
+      <div class="ward-tag">Masinga Sub-County · Machakos County</div>
+      <h1>Ekalakala Ward</h1>
+      <p>Live accountability dashboard — all CDF, MCA, County and National Government projects, bursaries, roads and promises.</p>
+      <div class="ward-meta">
+        <span>👥 ~10,700 registered voters</span>
+        <span>🗳️ Consolidate</span>
+      </div>
+    </div>
+    <div class="mca-card">
+      <div class="mca-avatar">🧑‍💼</div>
+      <div class="mca-name">Hon. Stephen Mwanthi</div>
+      <div class="mca-title">MCA — Ekalakala Ward</div>
+      <div class="mca-title" style="margin-top:6px">Machakos County Assembly</div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-row">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="statProjects">—</div><div class="stat-label">Total projects</div></div>
+    <div class="stat-card"><div class="stat-num" id="statBursaries">—</div><div class="stat-label">Bursaries awarded</div></div>
+    <div class="stat-card"><div class="stat-num" id="statRoads">—</div><div class="stat-label">Roads tracked</div></div>
+    <div class="stat-card"><div class="stat-num" id="statBudget">—</div><div class="stat-label">Bursary total (KES)</div></div>
+  </div>
+</div>
+
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Education</div>
+    <div class="section-title">📚 Bursaries — Ekalakala Ward</div>
+    <div class="data-table-wrap">
+      <table>
+        <thead><tr><th>Student Name</th><th>Admission No.</th><th>School</th><th>Amount (KES)</th><th>Term / Year</th><th>Status</th></tr></thead>
+        <tbody id="bursaryTable"><tr><td colspan="6" class="empty-state loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="alt-bg">
+  <div class="section-inner">
+    <div class="section-tag">Development</div>
+    <div class="section-title">🏗️ CDF Projects — Ekalakala Ward</div>
+    <div id="projectsGrid" class="projects-grid"><div class="loading">Loading projects…</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Ward Fund</div>
+    <div class="section-title">🏘️ MCA Ward Projects — Ekalakala Ward</div>
+    <div class="data-table-wrap">
+      <table>
+        <thead><tr><th>Project</th><th>Location</th><th>Budget (KES)</th><th>Status</th></tr></thead>
+        <tbody id="mcaTable"><tr><td colspan="4" class="empty-state loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="alt-bg">
+  <div class="section-inner">
+    <div class="section-tag">Infrastructure</div>
+    <div class="section-title">🛣️ Roads — Ekalakala Ward</div>
+    <div class="data-table-wrap">
+      <table>
+        <thead><tr><th>Road Name</th><th>Length (km)</th><th>Type</th><th>Status</th></tr></thead>
+        <tbody id="roadsTable"><tr><td colspan="4" class="empty-state loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-inner">
+    <div class="section-tag">Health</div>
+    <div class="section-title">🏥 Health Facilities — Ekalakala Ward</div>
+    <div class="data-table-wrap">
+      <table>
+        <thead><tr><th>Facility</th><th>Type</th><th>Project</th><th>Status</th></tr></thead>
+        <tbody id="healthTable"><tr><td colspan="4" class="empty-state loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="alt-bg">
+  <div class="section-inner">
+    <div class="section-tag">Accountability</div>
+    <div class="section-title">🤝 Promises Tracker — Ekalakala Ward</div>
+    <div class="data-table-wrap">
+      <table>
+        <thead><tr><th>Promise</th><th>Made By</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody id="promisesTable"><tr><td colspan="4" class="empty-state loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="ward-nav">
+  <a href="ndithini.html">← Ndithini Ward</a>
+  <a href="index.html">🏠 All Wards</a>
+  <a href="muthesya.html">Muthesya Ward →</a>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">💡 Angazake</div>
+    <div style="font-size:0.82rem">Ekalakala Ward · Masinga Sub-County · Machakos County</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="ndithini.html">Ndithini Ward</a>
+      <a href="muthesya.html">Muthesya Ward</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL='https://awbozblyodzinzfhybtg.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3Ym96Ymx5b2R6aW56Zmh5YnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNTg3NzIsImV4cCI6MjA5MzkzNDc3Mn0.l6Gm9RSRbBMirGvff1hU2xgTxY6f0oEHPbSaBN6ORxs';
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const WARD='Ekalakala Ward';
+
+function badge(s){
+  if(!s)return'<span class="status-badge s-pending">Unknown</span>';
+  const l=s.toLowerCase();
+  const cl=l.includes('complet')?'s-complete':l.includes('disburse')||l.includes('approv')?'s-approved':l.includes('ongo')||l.includes('progress')?'s-ongoing':l.includes('stall')?'s-stalled':l.includes('reject')?'s-rejected':'s-pending';
+  return`<span class="status-badge ${cl}">${s}</span>`;
+}
+function emptyRow(c,msg){return`<tr><td colspan="${c}" class="empty-state"><strong>No data yet</strong>${msg}</td></tr>`;}
+
+async function loadBursaries(){
+  const{data}=await db.from('bursaries').select('*').ilike('ward',`%${WARD}%`).order('student_name');
+  const tb=document.getElementById('bursaryTable');
+  if(!data||!data.length){tb.innerHTML=emptyRow(6,'Bursary records will appear here once entered.');return;}
+  let total=0;
+  tb.innerHTML=data.map(r=>{
+    total+=Number(r.amount)||0;
+    const sc={approved:'s-approved',disbursed:'s-approved',pending:'s-pending',rejected:'s-rejected'}[r.status?.toLowerCase()]||'s-pending';
+    return`<tr><td><strong>${r.student_name||'—'}</strong></td><td>${r.admission_no||'—'}</td><td>${r.school||'—'}</td><td>KES ${Number(r.amount||0).toLocaleString()}</td><td>${r.term||'—'} / ${r.year||'—'}</td><td><span class="status-badge ${sc}">${r.status||'Pending'}</span></td></tr>`;
+  }).join('');
+  document.getElementById('statBursaries').textContent=data.length;
+  document.getElementById('statBudget').textContent=`${(total/1000).toFixed(0)}K`;
+}
+
+async function loadProjects(){
+  const{data}=await db.from('projects').select('*').ilike('ward',`%${WARD}%`);
+  const grid=document.getElementById('projectsGrid');
+  if(!data||!data.length){grid.innerHTML=`<div class="empty-state"><strong>No projects yet</strong>CDF projects will appear here once entered.</div>`;return;}
+  document.getElementById('statProjects').textContent=data.length;
+  grid.innerHTML=data.map(r=>`<div class="project-card"><div class="project-cat">${r.category||'CDF'}</div><div class="project-name">${r.project_name||r.name||'Unnamed Project'}</div><div class="project-meta">Budget: KES ${Number(r.budget||r.amount||0).toLocaleString()}</div><div class="project-meta">Contractor: ${r.contractor||'—'}</div><div class="progress-bar"><div class="progress-fill" style="width:${r.completion_percentage||0}%"></div></div><div class="project-meta" style="margin-top:6px">${r.completion_percentage||0}% complete · ${badge(r.status)}</div></div>`).join('');
+}
+
+async function loadMCA(){
+  const{data}=await db.from('mca_projects').select('*').ilike('ward',`%${WARD}%`);
+  const tb=document.getElementById('mcaTable');
+  if(!data||!data.length){tb.innerHTML=emptyRow(4,'MCA ward fund projects will appear here once entered.');return;}
+  tb.innerHTML=data.map(r=>`<tr><td><strong>${r.project_name||r.name||'—'}</strong></td><td>${r.location||r.village||'—'}</td><td>KES ${Number(r.budget||r.amount||0).toLocaleString()}</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+
+async function loadRoads(){
+  const{data}=await db.from('Roads').select('*').ilike('ward',`%${WARD}%`);
+  const tb=document.getElementById('roadsTable');
+  if(!data||!data.length){tb.innerHTML=emptyRow(4,'Roads data will appear here once entered.');return;}
+  document.getElementById('statRoads').textContent=data.length;
+  tb.innerHTML=data.map(r=>`<tr><td><strong>${r.road_name||r.name||'—'}</strong></td><td>${r.length_km||r.length||'—'}</td><td>${r.type||r.surface||'—'}</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+
+async function loadHealth(){
+  const{data}=await db.from('health_facilities').select('*').ilike('ward',`%${WARD}%`);
+  const tb=document.getElementById('healthTable');
+  if(!data||!data.length){tb.innerHTML=emptyRow(4,'Health facility data will appear here once entered.');return;}
+  tb.innerHTML=data.map(r=>`<tr><td><strong>${r.facility_name||r.name||'—'}</strong></td><td>${r.type||r.facility_type||'—'}</td><td>${r.project||r.description||'—'}</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+
+async function loadPromises(){
+  const{data}=await db.from('promises').select('*').ilike('ward',`%${WARD}%`);
+  const tb=document.getElementById('promisesTable');
+  if(!data||!data.length){tb.innerHTML=emptyRow(4,'Promises tracker will appear here once entered.');return;}
+  tb.innerHTML=data.map(r=>`<tr><td><strong>${r.promise||r.description||'—'}</strong></td><td>${r.made_by||r.leader||'—'}</td><td>${r.date_made||r.date||'—'}</td><td>${badge(r.status)}</td></tr>`).join('');
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  Promise.all([loadBursaries(),loadProjects(),loadMCA(),loadRoads(),loadHealth(),loadPromises()]);
+});
+</script>
+</body>
+</html>
