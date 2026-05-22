@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Projects Tracker — Angazake</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0d1117;--paper:#f9f7f2;--green:#1a6b3c;--green-light:#e8f4ed;--gold:#c8860a;--red:#c0392b;--blue:#1a4a7a;--muted:#6b7280;--border:#e2ddd6;--card:#ffffff;--radius:12px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(249,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5vw}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-brand span{background:var(--green);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.8rem}
+.nav-links{display:flex;gap:20px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:0.85rem;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.nav-back{font-size:0.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--green)}
+
+/* PAGE HEADER */
+.page-header{background:var(--ink);color:#fff;padding:48px 5vw}
+.page-header-inner{max-width:1200px;margin:0 auto}
+.page-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af;margin-bottom:8px}
+.page-header h1{font-family:'Sora',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.1;margin-bottom:12px}
+.page-header p{color:#9ca3af;font-size:0.95rem;max-width:560px}
+
+/* STATS */
+.stats-bar{max-width:1200px;margin:-24px auto 0;padding:0 5vw;position:relative;z-index:10}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 4px 16px rgba(0,0,0,0.06);text-align:center}
+.stat-num{font-family:'Sora',sans-serif;font-size:1.6rem;font-weight:800;color:var(--green);line-height:1}
+.stat-label{font-size:0.75rem;color:var(--muted);margin-top:4px}
+
+/* FILTERS */
+.filters-section{max-width:1200px;margin:40px auto 0;padding:0 5vw}
+.filters-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
+.filters-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.filter-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:150px}
+.filter-group label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+select,input[type=text]{padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.88rem;background:#fff;color:var(--ink);outline:none;transition:border-color .2s;width:100%}
+select:focus,input[type=text]:focus{border-color:var(--green)}
+.filter-btn{background:var(--green);color:#fff;padding:10px 22px;border:none;border-radius:8px;font-weight:600;font-size:0.88rem;cursor:pointer;font-family:inherit;transition:opacity .2s;white-space:nowrap;height:42px}
+.filter-btn:hover{opacity:0.88}
+.reset-btn{background:transparent;color:var(--muted);padding:10px 16px;border:1px solid var(--border);border-radius:8px;font-weight:500;font-size:0.88rem;cursor:pointer;font-family:inherit;transition:all .2s;height:42px}
+.reset-btn:hover{border-color:var(--ink);color:var(--ink)}
+
+/* VIEW TOGGLE */
+.view-toggle{display:flex;gap:8px;margin-left:auto}
+.view-btn{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:0.85rem;transition:all .2s;color:var(--muted)}
+.view-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* RESULTS */
+.results-section{max-width:1200px;margin:24px auto;padding:0 5vw}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.results-count{font-size:0.85rem;color:var(--muted)}
+.results-count strong{color:var(--ink)}
+
+/* GRID VIEW */
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.project-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:box-shadow .2s;display:flex;flex-direction:column}
+.project-card:hover{box-shadow:0 6px 24px rgba(0,0,0,0.09)}
+.project-photo{height:160px;background:#e5e7eb;position:relative;overflow:hidden}
+.project-photo img{width:100%;height:100%;object-fit:cover}
+.project-photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:linear-gradient(135deg,#e8f4ed,#d6e8f0)}
+.project-type-tag{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.7);color:#fff;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em}
+.project-body{padding:18px;flex:1;display:flex;flex-direction:column;gap:8px}
+.project-name{font-family:'Sora',sans-serif;font-weight:700;font-size:0.95rem;line-height:1.3;color:var(--ink)}
+.project-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.project-meta{font-size:0.78rem;color:var(--muted)}
+.project-funder{font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--green-light);color:var(--green)}
+.project-ward{font-size:0.75rem;color:var(--muted);background:#f3f4f6;padding:3px 10px;border-radius:99px}
+.progress-wrap{margin-top:4px}
+.progress-label{display:flex;justify-content:space-between;font-size:0.75rem;color:var(--muted);margin-bottom:4px}
+.progress-bar{height:6px;background:#e5e7eb;border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width .6s}
+.fill-complete{background:#16a34a}
+.fill-ongoing{background:#ca8a04}
+.fill-stalled{background:#dc2626}
+.fill-default{background:var(--green)}
+.project-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.cost-tag{font-family:'Sora',sans-serif;font-size:0.88rem;font-weight:700;color:var(--ink)}
+.map-link{font-size:0.78rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:4px;transition:opacity .2s}
+.map-link:hover{opacity:0.7}
+
+/* TABLE VIEW */
+.table-view{display:none}
+.data-table-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:0.84rem}
+thead{background:var(--ink)}
+th{padding:12px 16px;text-align:left;font-size:0.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.7);white-space:nowrap}
+td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--paper)}
+
+/* STATUS BADGES */
+.status-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.73rem;font-weight:600;white-space:nowrap}
+.s-complete{background:#dcfce7;color:#166534}
+.s-ongoing{background:#fef9c3;color:#854d0e}
+.s-stalled{background:#fee2e2;color:#991b1b}
+.s-notstarted{background:#f3f4f6;color:#374151}
+.s-default{background:#e0e7ff;color:#3730a3}
+
+/* EMPTY / LOADING */
+.empty-state{padding:60px 24px;text-align:center;color:var(--muted)}
+.empty-icon{font-size:3rem;margin-bottom:16px}
+.empty-state h3{font-family:'Sora',sans-serif;font-size:1.1rem;color:var(--ink);margin-bottom:8px}
+.empty-state p{font-size:0.88rem;max-width:360px;margin:0 auto}
+.loading-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius);height:280px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* FOOTER */
+footer{background:var(--ink);color:#9ca3af;padding:32px 5vw;margin-top:60px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:'Sora',sans-serif;font-weight:800;color:#fff;font-size:1rem}
+.footer-links a{font-size:0.82rem;color:#9ca3af;text-decoration:none;margin-left:20px;transition:color .2s}
+.footer-links a:hover{color:#fff}
+
+@media(max-width:768px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .nav-links{display:none}
+  .filters-row{flex-direction:column}
+  .view-toggle{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">💡 Angazake <span>PILOT</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="projects.html" class="active">Projects</a></li>
+      <li><a href="index.html#bursary">Bursary</a></li>
+      <li><a href="roads.html">Roads</a></li>
+    </ul>
+    <a class="nav-back" href="index.html">← Home</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-tag">Masinga Sub-County · All Wards</div>
+    <h1>🏗️ Projects Master Tracker</h1>
+    <p>Every CDF, MCA, County and National Government project in Masinga Sub-County — verified, mapped and publicly accountable.</p>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-label">Total projects</div></div>
+    <div class="stat-card"><div class="stat-num" id="statComplete">—</div><div class="stat-label">Completed</div></div>
+    <div class="stat-card"><div class="stat-num" id="statOngoing">—</div><div class="stat-label">Ongoing</div></div>
+    <div class="stat-card"><div class="stat-num" id="statStalled">—</div><div class="stat-label">Stalled</div></div>
+    <div class="stat-card"><div class="stat-num" id="statBudget">—</div><div class="stat-label">Total budget (KES)</div></div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-section">
+  <div class="filters-box">
+    <div class="filters-row">
+      <div class="filter-group" style="flex:2;min-width:200px">
+        <label>Search project</label>
+        <input type="text" id="searchInput" placeholder="Project name or contractor…"/>
+      </div>
+      <div class="filter-group">
+        <label>Ward</label>
+        <select id="wardFilter">
+          <option value="">All Wards</option>
+          <option value="Kivaa">Kivaa</option>
+          <option value="Masinga Central">Masinga Central</option>
+          <option value="Ndithini">Ndithini</option>
+          <option value="Ekalakala">Ekalakala</option>
+          <option value="Muthesya">Muthesya</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Type</label>
+        <select id="typeFilter">
+          <option value="">All Types</option>
+          <option value="CDF">CDF</option>
+          <option value="MCA">MCA</option>
+          <option value="County">County</option>
+          <option value="National">National</option>
+          <option value="Donor">Donor</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="statusFilter">
+          <option value="">All Statuses</option>
+          <option value="Complete">Complete</option>
+          <option value="Ongoing">Ongoing</option>
+          <option value="Stalled">Stalled</option>
+          <option value="Not Started">Not Started</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Funder</label>
+        <select id="funderFilter">
+          <option value="">All Funders</option>
+          <option value="CDF">CDF</option>
+          <option value="County">County Govt</option>
+          <option value="National">National Govt</option>
+          <option value="Donor">Donor/NGO</option>
+          <option value="MCA">Ward Fund</option>
+        </select>
+      </div>
+      <button class="filter-btn" onclick="applyFilters()">Search</button>
+      <button class="reset-btn" onclick="resetFilters()">Reset</button>
+      <div class="view-toggle">
+        <button class="view-btn active" id="gridBtn" onclick="setView('grid')">⊞ Grid</button>
+        <button class="view-btn" id="tableBtn" onclick="setView('table')">☰ Table</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results-section">
+  <div class="results-header">
+    <div class="results-count" id="resultsCount">Loading projects…</div>
+  </div>
+
+  <!-- GRID VIEW -->
+  <div id="gridView">
+    <div class="loading-grid" id="loadingSkeletons">
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+    </div>
+    <div class="projects-grid" id="projectsGrid" style="display:none"></div>
+  </div>
+
+  <!-- TABLE VIEW -->
+  <div class="table-view" id="tableView">
+    <div class="data-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Project Name</th>
+            <th>Ward</th>
+            <th>Type</th>
+            <th>Funder</th>
+            <th>Cost (KES)</th>
+            <th>Contractor</th>
+            <th>Completion</th>
+            <th>Status</th>
+            <th>Map</th>
+          </tr>
+        </thead>
+        <tbody id="projectsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div id="emptyState" style="display:none">
+    <div class="empty-state">
+      <div class="empty-icon">🏗️</div>
+      <h3>No projects found</h3>
+      <p>Try adjusting your filters or search term. Projects will populate here as data is entered into the system.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">💡 Angazake</div>
+    <div style="font-size:0.82rem">Projects Master Tracker · Masinga Sub-County</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#bursary">Bursary</a>
+      <a href="roads.html">Roads</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL = 'https://awbozblyodzinzfhybtg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3Ym96Ymx5b2R6aW56Zmh5YnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNTg3NzIsImV4cCI6MjA5MzkzNDc3Mn0.l6Gm9RSRbBMirGvff1hU2xgTxY6f0oEHPbSaBN6ORxs';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let allProjects = [];
+let currentView = 'grid';
+
+// ── STATUS HELPERS ──────────────────────────────────────────────────────────
+function statusBadge(s) {
+  if (!s) return '<span class="status-badge s-default">Unknown</span>';
+  const l = s.toLowerCase();
+  const cl = l.includes('complet') ? 's-complete' :
+             l.includes('ongo') || l.includes('progress') ? 's-ongoing' :
+             l.includes('stall') ? 's-stalled' :
+             l.includes('not') ? 's-notstarted' : 's-default';
+  return `<span class="status-badge ${cl}">${s}</span>`;
+}
+
+function progressClass(s) {
+  if (!s) return 'fill-default';
+  const l = s.toLowerCase();
+  return l.includes('complet') ? 'fill-complete' :
+         l.includes('stall') ? 'fill-stalled' :
+         l.includes('ongo') || l.includes('progress') ? 'fill-ongoing' : 'fill-default';
+}
+
+function projectEmoji(type) {
+  const map = {
+    'road':'🛣️','water':'💧','health':'🏥','school':'🏫','education':'🎓',
+    'market':'🏪','electrification':'⚡','security':'🔒','sports':'⚽',
+    'bridge':'🌉','bursary':'📚','climate':'🌱','youth':'👷'
+  };
+  if (!type) return '🏗️';
+  const l = type.toLowerCase();
+  for (const [k, v] of Object.entries(map)) {
+    if (l.includes(k)) return v;
+  }
+  return '🏗️';
+}
+
+function formatCost(n) {
+  if (!n) return '—';
+  const num = Number(n);
+  if (num >= 1000000) return `${(num/1000000).toFixed(1)}M`;
+  if (num >= 1000) return `${(num/1000).toFixed(0)}K`;
+  return num.toLocaleString();
+}
+
+// ── LOAD DATA ───────────────────────────────────────────────────────────────
+async function loadProjects() {
+  const { data, error } = await db
+    .from('projects')
+    .select('Name, Ward, Type, Funder, Cost, Status, Completion_pct, Contractor, gps_lat, gps_lng, Photo_Url')
+    .order('Name');
+
+  document.getElementById('loadingSkeletons').style.display = 'none';
+
+  if (error || !data) {
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('resultsCount').textContent = 'Could not load projects.';
+    return;
+  }
+
+  allProjects = data;
+  updateStats(data);
+  renderProjects(data);
+}
+
+// ── STATS ───────────────────────────────────────────────────────────────────
+function updateStats(data) {
+  const complete = data.filter(p => p.Status?.toLowerCase().includes('complet')).length;
+  const ongoing  = data.filter(p => p.Status?.toLowerCase().includes('ongo') || p.Status?.toLowerCase().includes('progress')).length;
+  const stalled  = data.filter(p => p.Status?.toLowerCase().includes('stall')).length;
+  const budget   = data.reduce((sum, p) => sum + (Number(p.Cost) || 0), 0);
+
+  document.getElementById('statTotal').textContent    = data.length;
+  document.getElementById('statComplete').textContent = complete;
+  document.getElementById('statOngoing').textContent  = ongoing;
+  document.getElementById('statStalled').textContent  = stalled;
+  document.getElementById('statBudget').textContent   = `${(budget/1000000).toFixed(1)}M`;
+}
+
+// ── RENDER GRID ─────────────────────────────────────────────────────────────
+function renderGrid(data) {
+  const grid = document.getElementById('projectsGrid');
+  grid.style.display = 'grid';
+
+  if (!data.length) {
+    document.getElementById('emptyState').style.display = 'block';
+    grid.style.display = 'none';
+    return;
+  }
+
+  document.getElementById('emptyState').style.display = 'none';
+
+  grid.innerHTML = data.map(p => {
+    const pct = Number(p.Completion_pct) || 0;
+    const mapUrl = (p.gps_lat && p.gps_lng)
+      ? `https://www.google.com/maps?q=${p.gps_lat},${p.gps_lng}`
+      : null;
+    const photo = p.Photo_Url
+      ? `<img src="${p.Photo_Url}" alt="${p.Name}" onerror="this.parentElement.innerHTML='<div class=\\'project-photo-placeholder\\'>${projectEmoji(p.Type)}</div>'">`
+      : `<div class="project-photo-placeholder">${projectEmoji(p.Type)}</div>`;
+
+    return `
+      <div class="project-card">
+        <div class="project-photo">
+          ${photo}
+          <div class="project-type-tag">${p.Type || 'Project'}</div>
+        </div>
+        <div class="project-body">
+          <div class="project-name">${p.Name || 'Unnamed Project'}</div>
+          <div class="project-meta-row">
+            <span class="project-funder">${p.Funder || '—'}</span>
+            <span class="project-ward">📍 ${p.Ward || '—'}</span>
+          </div>
+          <div class="project-meta">👷 ${p.Contractor || 'Contractor not specified'}</div>
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span>Completion</span>
+              <span>${pct}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill ${progressClass(p.Status)}" style="width:${pct}%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="project-footer">
+          <div class="cost-tag">KES ${formatCost(p.Cost)}</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            ${statusBadge(p.Status)}
+            ${mapUrl ? `<a class="map-link" href="${mapUrl}" target="_blank">📍 Map</a>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── RENDER TABLE ─────────────────────────────────────────────────────────────
+function renderTable(data) {
+  const tbody = document.getElementById('projectsTable');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="padding:40px;text-align:center;color:var(--muted)">No projects found</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(p => {
+    const pct = Number(p.Completion_pct) || 0;
+    const mapUrl = (p.gps_lat && p.gps_lng)
+      ? `<a href="https://www.google.com/maps?q=${p.gps_lat},${p.gps_lng}" target="_blank" style="color:var(--green);font-size:0.8rem">📍 View</a>`
+      : '—';
+    return `<tr>
+      <td><strong>${p.Name || '—'}</strong></td>
+      <td>${p.Ward || '—'}</td>
+      <td>${p.Type || '—'}</td>
+      <td>${p.Funder || '—'}</td>
+      <td>KES ${formatCost(p.Cost)}</td>
+      <td>${p.Contractor || '—'}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:6px;background:#e5e7eb;border-radius:99px;overflow:hidden;min-width:60px">
+            <div style="height:100%;width:${pct}%;background:var(--green);border-radius:99px"></div>
+          </div>
+          <span style="font-size:0.78rem;color:var(--muted)">${pct}%</span>
+        </div>
+      </td>
+      <td>${statusBadge(p.Status)}</td>
+      <td>${mapUrl}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── RENDER (unified) ────────────────────────────────────────────────────────
+function renderProjects(data) {
+  document.getElementById('resultsCount').innerHTML =
+    `Showing <strong>${data.length}</strong> of <strong>${allProjects.length}</strong> projects`;
+  renderGrid(data);
+  renderTable(data);
+}
+
+// ── FILTERS ─────────────────────────────────────────────────────────────────
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.trim().toLowerCase();
+  const ward   = document.getElementById('wardFilter').value;
+  const type   = document.getElementById('typeFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  const funder = document.getElementById('funderFilter').value;
+
+  const filtered = allProjects.filter(p => {
+    const matchSearch = !search ||
+      (p.Name || '').toLowerCase().includes(search) ||
+      (p.Contractor || '').toLowerCase().includes(search);
+    const matchWard   = !ward   || (p.Ward   || '').toLowerCase().includes(ward.toLowerCase());
+    const matchType   = !type   || (p.Type   || '').toLowerCase().includes(type.toLowerCase());
+    const matchStatus = !status || (p.Status || '').toLowerCase().includes(status.toLowerCase());
+    const matchFunder = !funder || (p.Funder || '').toLowerCase().includes(funder.toLowerCase());
+    return matchSearch && matchWard && matchType && matchStatus && matchFunder;
+  });
+
+  renderProjects(filtered);
+}
+
+function resetFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('wardFilter').value  = '';
+  document.getElementById('typeFilter').value  = '';
+  document.getElementById('statusFilter').value= '';
+  document.getElementById('funderFilter').value= '';
+  renderProjects(allProjects);
+}
+
+// Allow Enter key to search
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') applyFilters();
+});
+
+// ── VIEW TOGGLE ──────────────────────────────────────────────────────────────
+function setView(view) {
+  currentView = view;
+  document.getElementById('gridView').style.display  = view === 'grid'  ? 'block' : 'none';
+  document.getElementById('tableView').style.display = view === 'table' ? 'block' : 'none';
+  document.getElementById('gridBtn').classList.toggle('active',  view === 'grid');
+  document.getElementById('tableBtn').classList.toggle('active', view === 'table');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', loadProjects);
+</script>
+</body>
+</html>
