@@ -441,7 +441,6 @@ async function submitReport(){
     Photo_Url: photoBase64 || null,
     Status: 'Pending',
     Reference_Number: ref,
-    Date_reported: new Date().toISOString().split('T')[0],
   };
 
   try{
