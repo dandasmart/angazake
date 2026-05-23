@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Roads Tracker — Angazake</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0d1117;--paper:#f9f7f2;--green:#1a6b3c;--green-light:#e8f4ed;--gold:#c8860a;--red:#c0392b;--blue:#1a4a7a;--muted:#6b7280;--border:#e2ddd6;--card:#ffffff;--radius:12px;--road:#1a4a7a;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(249,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5vw}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-brand span{background:var(--green);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.8rem}
+.nav-links{display:flex;gap:20px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:0.85rem;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.nav-back{font-size:0.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--green)}
+
+.page-header{background:var(--road);color:#fff;padding:48px 5vw}
+.page-header-inner{max-width:1200px;margin:0 auto}
+.page-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px}
+.page-header h1{font-family:'Sora',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.1;margin-bottom:12px}
+.page-header p{color:rgba(255,255,255,0.75);font-size:0.95rem;max-width:560px}
+
+.stats-bar{max-width:1200px;margin:-24px auto 0;padding:0 5vw;position:relative;z-index:10}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 4px 16px rgba(0,0,0,0.06);text-align:center}
+.stat-num{font-family:'Sora',sans-serif;font-size:1.6rem;font-weight:800;color:var(--road);line-height:1}
+.stat-label{font-size:0.75rem;color:var(--muted);margin-top:4px}
+
+.filters-section{max-width:1200px;margin:40px auto 0;padding:0 5vw}
+.filters-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
+.filters-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.filter-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:140px}
+.filter-group label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+select,input[type=text]{padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.88rem;background:#fff;color:var(--ink);outline:none;transition:border-color .2s;width:100%}
+select:focus,input[type=text]:focus{border-color:var(--road)}
+.filter-btn{background:var(--road);color:#fff;padding:10px 22px;border:none;border-radius:8px;font-weight:600;font-size:0.88rem;cursor:pointer;font-family:inherit;transition:opacity .2s;white-space:nowrap;height:42px}
+.filter-btn:hover{opacity:0.88}
+.reset-btn{background:transparent;color:var(--muted);padding:10px 16px;border:1px solid var(--border);border-radius:8px;font-weight:500;font-size:0.88rem;cursor:pointer;font-family:inherit;transition:all .2s;height:42px}
+.reset-btn:hover{border-color:var(--ink);color:var(--ink)}
+.view-toggle{display:flex;gap:8px;margin-left:auto}
+.view-btn{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:0.85rem;transition:all .2s;color:var(--muted)}
+.view-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.results-section{max-width:1200px;margin:24px auto;padding:0 5vw}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.results-count{font-size:0.85rem;color:var(--muted)}
+.results-count strong{color:var(--ink)}
+
+/* ROAD TYPE LEGEND */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--muted)}
+.legend-dot{width:12px;height:12px;border-radius:3px}
+.dot-tarmac{background:#1a4a7a}
+.dot-gravel{background:#c8860a}
+.dot-earth{background:#92400e}
+.dot-murram{background:#b45309}
+
+/* GRID VIEW */
+.roads-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.road-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:box-shadow .2s}
+.road-card:hover{box-shadow:0 6px 24px rgba(0,0,0,0.09)}
+.road-photo{height:150px;background:#e5e7eb;position:relative;overflow:hidden}
+.road-photo img{width:100%;height:100%;object-fit:cover}
+.road-photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;background:linear-gradient(135deg,#dbeafe,#e0e7ff)}
+.road-type-tag{position:absolute;top:10px;left:10px;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em;color:#fff}
+.tag-tarmac{background:#1a4a7a}
+.tag-gravel{background:#c8860a}
+.tag-earth{background:#92400e}
+.tag-murram{background:#b45309}
+.tag-default{background:#374151}
+.road-body{padding:18px}
+.road-name{font-family:'Sora',sans-serif;font-weight:700;font-size:0.97rem;line-height:1.3;margin-bottom:10px;color:var(--ink)}
+.road-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.road-detail{font-size:0.78rem;color:var(--muted)}
+.road-detail strong{display:block;color:var(--ink);font-size:0.85rem}
+.road-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.cost-tag{font-family:'Sora',sans-serif;font-size:0.88rem;font-weight:700;color:var(--ink)}
+.road-actions{display:flex;gap:10px;align-items:center}
+.action-link{font-size:0.78rem;color:var(--road);text-decoration:none;display:flex;align-items:center;gap:4px;transition:opacity .2s}
+.action-link:hover{opacity:0.7}
+
+/* TABLE VIEW */
+.table-view{display:none}
+.data-table-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.84rem;min-width:900px}
+thead{background:var(--ink)}
+th{padding:12px 16px;text-align:left;font-size:0.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.7);white-space:nowrap}
+td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--paper)}
+
+.status-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.73rem;font-weight:600;white-space:nowrap}
+.s-complete{background:#dcfce7;color:#166534}
+.s-ongoing{background:#fef9c3;color:#854d0e}
+.s-stalled{background:#fee2e2;color:#991b1b}
+.s-planned{background:#e0e7ff;color:#3730a3}
+.s-default{background:#f3f4f6;color:#374151}
+
+.km-badge{display:inline-flex;align-items:center;gap:4px;background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:700}
+
+.empty-state{padding:60px 24px;text-align:center;color:var(--muted)}
+.empty-icon{font-size:3rem;margin-bottom:16px}
+.empty-state h3{font-family:'Sora',sans-serif;font-size:1.1rem;color:var(--ink);margin-bottom:8px}
+.empty-state p{font-size:0.88rem;max-width:360px;margin:0 auto}
+.loading-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius);height:260px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* WARD KM SUMMARY */
+.ward-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:32px}
+.ward-km-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:4px}
+.ward-km-num{font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:800;color:var(--road)}
+.ward-km-label{font-size:0.78rem;color:var(--muted)}
+.ward-km-bar{height:4px;background:#e5e7eb;border-radius:99px;margin-top:8px;overflow:hidden}
+.ward-km-fill{height:100%;background:var(--road);border-radius:99px}
+
+footer{background:var(--ink);color:#9ca3af;padding:32px 5vw;margin-top:60px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:'Sora',sans-serif;font-weight:800;color:#fff;font-size:1rem}
+.footer-links a{font-size:0.82rem;color:#9ca3af;text-decoration:none;margin-left:20px;transition:color .2s}
+.footer-links a:hover{color:#fff}
+
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}.filters-row{flex-direction:column}.view-toggle{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">💡 Angazake <span>PILOT</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="index.html#bursary">Bursary</a></li>
+      <li><a href="roads.html" class="active">Roads</a></li>
+    </ul>
+    <a class="nav-back" href="index.html">← Home</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-tag">Masinga Sub-County · Infrastructure</div>
+    <h1>🛣️ Roads Tracker</h1>
+    <p>Every road in Masinga Sub-County — graded, tarmacked, murram and earth roads — tracked by ward, funder, contractor and audit status.</p>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-label">Total roads</div></div>
+    <div class="stat-card"><div class="stat-num" id="statKm">—</div><div class="stat-label">Total km tracked</div></div>
+    <div class="stat-card"><div class="stat-num" id="statComplete">—</div><div class="stat-label">Completed</div></div>
+    <div class="stat-card"><div class="stat-num" id="statOngoing">—</div><div class="stat-label">Ongoing</div></div>
+    <div class="stat-card"><div class="stat-num" id="statBudget">—</div><div class="stat-label">Total cost (KES)</div></div>
+  </div>
+</div>
+
+<div class="filters-section" style="margin-top:40px">
+  <!-- WARD KM SUMMARY -->
+  <div class="section-label" style="font-size:0.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Roads by Ward</div>
+  <div class="ward-summary" id="wardSummary">
+    <div class="ward-km-card"><div class="ward-km-num" id="kmKivaa">—</div><div class="ward-km-label">📍 Kivaa</div><div class="ward-km-bar"><div class="ward-km-fill" id="barKivaa" style="width:0%"></div></div></div>
+    <div class="ward-km-card"><div class="ward-km-num" id="kmMasinga">—</div><div class="ward-km-label">📍 Masinga Central</div><div class="ward-km-bar"><div class="ward-km-fill" id="barMasinga" style="width:0%"></div></div></div>
+    <div class="ward-km-card"><div class="ward-km-num" id="kmNdithini">—</div><div class="ward-km-label">📍 Ndithini</div><div class="ward-km-bar"><div class="ward-km-fill" id="barNdithini" style="width:0%"></div></div></div>
+    <div class="ward-km-card"><div class="ward-km-num" id="kmEkalakala">—</div><div class="ward-km-label">📍 Ekalakala</div><div class="ward-km-bar"><div class="ward-km-fill" id="barEkalakala" style="width:0%"></div></div></div>
+    <div class="ward-km-card"><div class="ward-km-num" id="kmMuthesya">—</div><div class="ward-km-label">📍 Muthesya</div><div class="ward-km-bar"><div class="ward-km-fill" id="barMuthesya" style="width:0%"></div></div></div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-box" style="margin-top:16px">
+    <div class="filters-row">
+      <div class="filter-group" style="flex:2;min-width:200px">
+        <label>Search road</label>
+        <input type="text" id="searchInput" placeholder="Road name or contractor…"/>
+      </div>
+      <div class="filter-group">
+        <label>Ward</label>
+        <select id="wardFilter">
+          <option value="">All Wards</option>
+          <option value="Kivaa">Kivaa</option>
+          <option value="Masinga Central">Masinga Central</option>
+          <option value="Ndithini">Ndithini</option>
+          <option value="Ekalakala">Ekalakala</option>
+          <option value="Muthesya">Muthesya</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Road Type</label>
+        <select id="typeFilter">
+          <option value="">All Types</option>
+          <option value="Tarmac">Tarmac</option>
+          <option value="Gravel">Gravel</option>
+          <option value="Murram">Murram</option>
+          <option value="Earth">Earth</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Funder</label>
+        <select id="funderFilter">
+          <option value="">All Funders</option>
+          <option value="CDF">CDF</option>
+          <option value="County">County Govt</option>
+          <option value="KeRRA">KeRRA</option>
+          <option value="KURA">KURA</option>
+          <option value="National">National Govt</option>
+          <option value="Donor">Donor/NGO</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="statusFilter">
+          <option value="">All Statuses</option>
+          <option value="Complete">Complete</option>
+          <option value="Ongoing">Ongoing</option>
+          <option value="Stalled">Stalled</option>
+          <option value="Planned">Planned</option>
+        </select>
+      </div>
+      <button class="filter-btn" onclick="applyFilters()">Search</button>
+      <button class="reset-btn" onclick="resetFilters()">Reset</button>
+      <div class="view-toggle">
+        <button class="view-btn active" id="gridBtn" onclick="setView('grid')">⊞ Grid</button>
+        <button class="view-btn" id="tableBtn" onclick="setView('table')">☰ Table</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="results-section">
+  <div class="results-header">
+    <div class="results-count" id="resultsCount">Loading roads…</div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-tarmac"></div> Tarmac/Bitumen</div>
+    <div class="legend-item"><div class="legend-dot dot-gravel"></div> Gravel</div>
+    <div class="legend-item"><div class="legend-dot dot-murram"></div> Murram</div>
+    <div class="legend-item"><div class="legend-dot dot-earth"></div> Earth</div>
+  </div>
+
+  <div id="gridView">
+    <div class="loading-grid" id="loadingSkeletons">
+      <div class="skeleton"></div><div class="skeleton"></div>
+      <div class="skeleton"></div><div class="skeleton"></div>
+    </div>
+    <div class="roads-grid" id="roadsGrid" style="display:none"></div>
+  </div>
+
+  <div class="table-view" id="tableView">
+    <div class="data-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Road Name</th>
+            <th>Ward</th>
+            <th>Length</th>
+            <th>Type</th>
+            <th>Funder</th>
+            <th>Cost (KES)</th>
+            <th>Contractor</th>
+            <th>Status</th>
+            <th>Audit</th>
+            <th>Photo</th>
+          </tr>
+        </thead>
+        <tbody id="roadsTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="emptyState" style="display:none">
+    <div class="empty-state">
+      <div class="empty-icon">🛣️</div>
+      <h3>No roads found</h3>
+      <p>Try adjusting your filters. Roads data will populate here as records are entered into the system.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">💡 Angazake</div>
+    <div style="font-size:0.82rem">Roads Tracker · Masinga Sub-County</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="projects.html">Projects</a>
+      <a href="index.html#bursary">Bursary</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL='https://awbozblyodzinzfhybtg.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3Ym96Ymx5b2R6aW56Zmh5YnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNTg3NzIsImV4cCI6MjA5MzkzNDc3Mn0.l6Gm9RSRbBMirGvff1hU2xgTxY6f0oEHPbSaBN6ORxs';
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let allRoads=[];
+
+function statusBadge(s){
+  if(!s)return'<span class="status-badge s-default">Unknown</span>';
+  const l=s.toLowerCase();
+  const cl=l.includes('complet')?'s-complete':l.includes('ongo')||l.includes('progress')?'s-ongoing':l.includes('stall')?'s-stalled':l.includes('plan')?'s-planned':'s-default';
+  return`<span class="status-badge ${cl}">${s}</span>`;
+}
+
+function roadTypeTag(t){
+  if(!t)return'<span class="road-type-tag tag-default">Road</span>';
+  const l=t.toLowerCase();
+  const cl=l.includes('tarmac')||l.includes('bitumen')?'tag-tarmac':l.includes('gravel')?'tag-gravel':l.includes('murram')?'tag-murram':l.includes('earth')?'tag-earth':'tag-default';
+  return`<span class="road-type-tag ${cl}">${t}</span>`;
+}
+
+function formatCost(n){
+  if(!n)return'—';
+  const num=Number(n);
+  if(num>=1000000)return`${(num/1000000).toFixed(1)}M`;
+  if(num>=1000)return`${(num/1000).toFixed(0)}K`;
+  return num.toLocaleString();
+}
+
+async function loadRoads(){
+  const{data,error}=await db.from('Roads').select('Name,Ward,km_length,Road_type,Cost,Contractor,Funder,Status,Audit_Url,Photo_Url').order('Name');
+  document.getElementById('loadingSkeletons').style.display='none';
+  if(error||!data){
+    document.getElementById('emptyState').style.display='block';
+    document.getElementById('resultsCount').textContent='Could not load roads data.';
+    return;
+  }
+  allRoads=data;
+  updateStats(data);
+  updateWardSummary(data);
+  renderRoads(data);
+}
+
+function updateStats(data){
+  const complete=data.filter(r=>r.Status?.toLowerCase().includes('complet')).length;
+  const ongoing=data.filter(r=>r.Status?.toLowerCase().includes('ongo')||r.Status?.toLowerCase().includes('progress')).length;
+  const totalKm=data.reduce((s,r)=>s+(Number(r.km_length)||0),0);
+  const totalCost=data.reduce((s,r)=>s+(Number(r.Cost)||0),0);
+  document.getElementById('statTotal').textContent=data.length;
+  document.getElementById('statKm').textContent=`${totalKm.toFixed(1)}`;
+  document.getElementById('statComplete').textContent=complete;
+  document.getElementById('statOngoing').textContent=ongoing;
+  document.getElementById('statBudget').textContent=`${(totalCost/1000000).toFixed(1)}M`;
+}
+
+function updateWardSummary(data){
+  const wards={
+    'Kivaa':{id:'Kivaa',kmEl:'kmKivaa',barEl:'barKivaa'},
+    'Masinga Central':{id:'Masinga Central',kmEl:'kmMasinga',barEl:'barMasinga'},
+    'Ndithini':{id:'Ndithini',kmEl:'kmNdithini',barEl:'barNdithini'},
+    'Ekalakala':{id:'Ekalakala',kmEl:'kmEkalakala',barEl:'barEkalakala'},
+    'Muthesya':{id:'Muthesya',kmEl:'kmMuthesya',barEl:'barMuthesya'}
+  };
+  const totals={};
+  let maxKm=0;
+  for(const[ward,]of Object.entries(wards)){
+    const km=data.filter(r=>(r.Ward||'').toLowerCase().includes(ward.toLowerCase())).reduce((s,r)=>s+(Number(r.km_length)||0),0);
+    totals[ward]=km;
+    if(km>maxKm)maxKm=km;
+  }
+  for(const[ward,cfg]of Object.entries(wards)){
+    const km=totals[ward]||0;
+    const el=document.getElementById(cfg.kmEl);
+    const bar=document.getElementById(cfg.barEl);
+    if(el)el.textContent=`${km.toFixed(1)} km`;
+    if(bar)bar.style.width=maxKm>0?`${(km/maxKm)*100}%`:'0%';
+  }
+}
+
+function renderGrid(data){
+  const grid=document.getElementById('roadsGrid');
+  grid.style.display='grid';
+  if(!data.length){document.getElementById('emptyState').style.display='block';grid.style.display='none';return;}
+  document.getElementById('emptyState').style.display='none';
+  grid.innerHTML=data.map(r=>{
+    const photo=r.Photo_Url?`<img src="${r.Photo_Url}" alt="${r.Name}" onerror="this.parentElement.innerHTML='<div class=\\'road-photo-placeholder\\'>🛣️</div>'">`:'<div class="road-photo-placeholder">🛣️</div>';
+    const auditBtn=r.Audit_Url?`<a class="action-link" href="${r.Audit_Url}" target="_blank">📄 Audit</a>`:'';
+    return`<div class="road-card">
+      <div class="road-photo">${photo}${roadTypeTag(r.Road_type)}</div>
+      <div class="road-body">
+        <div class="road-name">${r.Name||'Unnamed Road'}</div>
+        <div class="road-details">
+          <div class="road-detail"><strong>📍 ${r.Ward||'—'}</strong>Ward</div>
+          <div class="road-detail"><strong><span class="km-badge">📏 ${r.km_length||'—'} km</span></strong>Length</div>
+          <div class="road-detail"><strong>${r.Funder||'—'}</strong>Funder</div>
+          <div class="road-detail"><strong>${r.Contractor||'—'}</strong>Contractor</div>
+        </div>
+      </div>
+      <div class="road-footer">
+        <div class="cost-tag">KES ${formatCost(r.Cost)}</div>
+        <div class="road-actions">${statusBadge(r.Status)}${auditBtn}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTable(data){
+  const tbody=document.getElementById('roadsTable');
+  if(!data.length){tbody.innerHTML=`<tr><td colspan="10" style="padding:40px;text-align:center;color:var(--muted)">No roads found</td></tr>`;return;}
+  tbody.innerHTML=data.map(r=>`<tr>
+    <td><strong>${r.Name||'—'}</strong></td>
+    <td>${r.Ward||'—'}</td>
+    <td><span class="km-badge">📏 ${r.km_length||'—'} km</span></td>
+    <td>${r.Road_type||'—'}</td>
+    <td>${r.Funder||'—'}</td>
+    <td>KES ${formatCost(r.Cost)}</td>
+    <td>${r.Contractor||'—'}</td>
+    <td>${statusBadge(r.Status)}</td>
+    <td>${r.Audit_Url?`<a href="${r.Audit_Url}" target="_blank" style="color:var(--road);font-size:0.8rem">📄 View</a>`:'—'}</td>
+    <td>${r.Photo_Url?`<a href="${r.Photo_Url}" target="_blank" style="color:var(--road);font-size:0.8rem">📸 View</a>`:'—'}</td>
+  </tr>`).join('');
+}
+
+function renderRoads(data){
+  document.getElementById('resultsCount').innerHTML=`Showing <strong>${data.length}</strong> of <strong>${allRoads.length}</strong> roads`;
+  renderGrid(data);
+  renderTable(data);
+}
+
+function applyFilters(){
+  const search=document.getElementById('searchInput').value.trim().toLowerCase();
+  const ward=document.getElementById('wardFilter').value;
+  const type=document.getElementById('typeFilter').value;
+  const funder=document.getElementById('funderFilter').value;
+  const status=document.getElementById('statusFilter').value;
+  const filtered=allRoads.filter(r=>{
+    const ms=!search||(r.Name||'').toLowerCase().includes(search)||(r.Contractor||'').toLowerCase().includes(search);
+    const mw=!ward||(r.Ward||'').toLowerCase().includes(ward.toLowerCase());
+    const mt=!type||(r.Road_type||'').toLowerCase().includes(type.toLowerCase());
+    const mf=!funder||(r.Funder||'').toLowerCase().includes(funder.toLowerCase());
+    const mst=!status||(r.Status||'').toLowerCase().includes(status.toLowerCase());
+    return ms&&mw&&mt&&mf&&mst;
+  });
+  renderRoads(filtered);
+}
+
+function resetFilters(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('wardFilter').value='';
+  document.getElementById('typeFilter').value='';
+  document.getElementById('funderFilter').value='';
+  document.getElementById('statusFilter').value='';
+  renderRoads(allRoads);
+}
+
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')applyFilters();});
+
+function setView(view){
+  document.getElementById('gridView').style.display=view==='grid'?'block':'none';
+  document.getElementById('tableView').style.display=view==='table'?'block':'none';
+  document.getElementById('gridBtn').classList.toggle('active',view==='grid');
+  document.getElementById('tableBtn').classList.toggle('active',view==='table');
+}
+
+document.addEventListener('DOMContentLoaded',loadRoads);
+</script>
+</body>
+</html>
