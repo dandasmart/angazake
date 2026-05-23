@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Report a Project — Angazake</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0d1117;--paper:#f9f7f2;--green:#1a6b3c;--green-light:#e8f4ed;--gold:#c8860a;--red:#c0392b;--muted:#6b7280;--border:#e2ddd6;--card:#ffffff;--radius:12px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(249,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5vw}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-brand span{background:var(--green);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.8rem}
+.nav-links{display:flex;gap:20px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:0.85rem;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.nav-back{font-size:0.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--green)}
+
+.page-header{background:var(--ink);color:#fff;padding:48px 5vw}
+.page-header-inner{max-width:800px;margin:0 auto}
+.page-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af;margin-bottom:8px}
+.page-header h1{font-family:'Sora',sans-serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;line-height:1.1;margin-bottom:12px}
+.page-header p{color:#9ca3af;font-size:0.95rem;max-width:520px}
+
+.report-types{max-width:800px;margin:40px auto 0;padding:0 5vw;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.report-type-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:all .2s;text-align:center}
+.report-type-card:hover{border-color:var(--green);box-shadow:0 4px 16px rgba(26,107,60,0.1)}
+.report-type-card.selected{border-color:var(--green);background:var(--green-light)}
+.report-type-icon{font-size:2rem;margin-bottom:8px}
+.report-type-name{font-weight:700;font-size:0.9rem;color:var(--ink);margin-bottom:4px}
+.report-type-desc{font-size:0.75rem;color:var(--muted);line-height:1.4}
+
+.form-section{max-width:800px;margin:32px auto;padding:0 5vw 60px}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.form-header{background:var(--green);color:#fff;padding:20px 28px}
+.form-header h2{font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700}
+.form-header p{font-size:0.82rem;color:rgba(255,255,255,0.75);margin-top:4px}
+.form-body{padding:28px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.form-group label span{color:var(--red)}
+input[type=text],input[type=tel],input[type=number],select,textarea{padding:11px 14px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.9rem;color:var(--ink);background:#fff;outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(26,107,60,0.08)}
+textarea{resize:vertical;min-height:100px;line-height:1.5}
+.char-count{font-size:0.72rem;color:var(--muted);text-align:right;margin-top:2px}
+
+/* GPS */
+.gps-row{display:flex;gap:10px;align-items:flex-end}
+.gps-row input{flex:1}
+.gps-btn{background:var(--ink);color:#fff;padding:11px 16px;border:none;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:opacity .2s;display:flex;align-items:center;gap:6px}
+.gps-btn:hover{opacity:0.85}
+.gps-status{font-size:0.75rem;margin-top:4px;min-height:18px}
+.gps-status.success{color:var(--green)}
+.gps-status.error{color:var(--red)}
+.gps-status.loading{color:var(--gold)}
+
+/* PHOTO UPLOAD */
+.photo-upload{border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.photo-upload:hover{border-color:var(--green);background:var(--green-light)}
+.photo-upload.has-file{border-color:var(--green);background:var(--green-light)}
+.photo-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-icon{font-size:2rem;margin-bottom:8px}
+.photo-text{font-size:0.85rem;color:var(--muted)}
+.photo-text strong{display:block;color:var(--ink);margin-bottom:4px}
+.photo-preview{margin-top:12px;display:none}
+.photo-preview img{max-height:150px;border-radius:8px;border:1px solid var(--border)}
+
+/* SUBMIT */
+.form-footer{padding:20px 28px;border-top:1px solid var(--border);background:var(--paper);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.privacy-note{font-size:0.78rem;color:var(--muted);max-width:360px}
+.submit-btn{background:var(--green);color:#fff;padding:13px 32px;border:none;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;gap:8px}
+.submit-btn:hover{opacity:0.88;transform:translateY(-1px)}
+.submit-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+/* SUCCESS STATE */
+.success-state{display:none;padding:48px 28px;text-align:center}
+.success-icon{font-size:4rem;margin-bottom:16px}
+.success-state h2{font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:800;color:var(--green);margin-bottom:12px}
+.success-state p{color:var(--muted);font-size:0.92rem;max-width:420px;margin:0 auto 24px}
+.success-ref{display:inline-block;background:var(--green-light);border:1px solid #b7ddc7;color:var(--green);padding:8px 20px;border-radius:99px;font-weight:700;font-size:0.88rem;margin-bottom:24px}
+.btn-another{background:var(--ink);color:#fff;padding:11px 24px;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.9rem}
+
+/* HOW IT WORKS */
+.how-section{max-width:800px;margin:0 auto 40px;padding:0 5vw}
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.how-step{text-align:center;padding:20px 12px}
+.how-num{width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;font-family:'Sora',sans-serif;font-weight:800;font-size:0.9rem;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.how-title{font-weight:700;font-size:0.85rem;margin-bottom:6px}
+.how-desc{font-size:0.78rem;color:var(--muted);line-height:1.4}
+
+footer{background:var(--ink);color:#9ca3af;padding:32px 5vw;margin-top:20px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:'Sora',sans-serif;font-weight:800;color:#fff;font-size:1rem}
+.footer-links a{font-size:0.82rem;color:#9ca3af;text-decoration:none;margin-left:20px;transition:color .2s}
+.footer-links a:hover{color:#fff}
+
+@media(max-width:768px){
+  .form-grid{grid-template-columns:1fr}
+  .report-types{grid-template-columns:1fr}
+  .how-grid{grid-template-columns:repeat(2,1fr)}
+  .nav-links{display:none}
+  .form-footer{flex-direction:column;align-items:stretch}
+  .submit-btn{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">💡 Angazake <span>PILOT</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="roads.html">Roads</a></li>
+      <li><a href="report.html" class="active">Report</a></li>
+    </ul>
+    <a class="nav-back" href="index.html">← Home</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-tag">Citizen Accountability · Masinga Sub-County</div>
+    <h1>📸 Report a Project</h1>
+    <p>Spotted a stalled project? A white elephant? A project not on our radar? Report it here — your report goes straight to our verification team.</p>
+  </div>
+</div>
+
+<!-- REPORT TYPE SELECTOR -->
+<div class="report-types">
+  <div class="report-type-card selected" onclick="selectType(this,'Stalled Project')">
+    <div class="report-type-icon">🚧</div>
+    <div class="report-type-name">Stalled Project</div>
+    <div class="report-type-desc">A funded project that has stopped or is abandoned</div>
+  </div>
+  <div class="report-type-card" onclick="selectType(this,'White Elephant')">
+    <div class="report-type-icon">🐘</div>
+    <div class="report-type-name">White Elephant</div>
+    <div class="report-type-desc">A completed project that is unused or non-functional</div>
+  </div>
+  <div class="report-type-card" onclick="selectType(this,'New Project')">
+    <div class="report-type-icon">🏗️</div>
+    <div class="report-type-name">New Project</div>
+    <div class="report-type-desc">A project not yet on the Angazake platform</div>
+  </div>
+  <div class="report-type-card" onclick="selectType(this,'Substandard Work')">
+    <div class="report-type-icon">⚠️</div>
+    <div class="report-type-name">Substandard Work</div>
+    <div class="report-type-desc">Poor quality construction or materials used</div>
+  </div>
+  <div class="report-type-card" onclick="selectType(this,'Completed Project')">
+    <div class="report-type-icon">✅</div>
+    <div class="report-type-name">Completed Project</div>
+    <div class="report-type-desc">Update us that a project has been finished</div>
+  </div>
+  <div class="report-type-card" onclick="selectType(this,'Other')">
+    <div class="report-type-icon">📝</div>
+    <div class="report-type-name">Other Issue</div>
+    <div class="report-type-desc">Any other accountability concern in your ward</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section" style="margin-top:32px">
+  <div class="how-grid">
+    <div class="how-step">
+      <div class="how-num">1</div>
+      <div class="how-title">You Report</div>
+      <div class="how-desc">Fill in the form with project details and photo</div>
+    </div>
+    <div class="how-step">
+      <div class="how-num">2</div>
+      <div class="how-title">We Verify</div>
+      <div class="how-desc">Our verification agent visits the site within 10 days</div>
+    </div>
+    <div class="how-step">
+      <div class="how-num">3</div>
+      <div class="how-title">We Publish</div>
+      <div class="how-desc">Verified report goes live on the platform</div>
+    </div>
+    <div class="how-step">
+      <div class="how-num">4</div>
+      <div class="how-title">Action Follows</div>
+      <div class="how-desc">Report shared with relevant authorities and media</div>
+    </div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="form-section">
+  <div class="form-card">
+    <div class="form-header">
+      <h2>📝 Submit Your Report</h2>
+      <p>All fields marked * are required. Your contact details are kept private.</p>
+    </div>
+
+    <div class="form-body" id="formBody">
+      <div class="form-grid">
+
+        <!-- REPORTER NAME -->
+        <div class="form-group">
+          <label>Your Name <span>*</span></label>
+          <input type="text" id="reporter_name" placeholder="e.g. John Mutua" maxlength="100"/>
+        </div>
+
+        <!-- REPORTER PHONE -->
+        <div class="form-group">
+          <label>Phone Number <span>*</span></label>
+          <input type="tel" id="reporter_phone" placeholder="e.g. 0712 345 678" maxlength="20"/>
+        </div>
+
+        <!-- WARD -->
+        <div class="form-group">
+          <label>Ward <span>*</span></label>
+          <select id="ward">
+            <option value="">— Select Ward —</option>
+            <option value="Kivaa">Kivaa</option>
+            <option value="Masinga Central">Masinga Central</option>
+            <option value="Ndithini">Ndithini</option>
+            <option value="Ekalakala">Ekalakala</option>
+            <option value="Muthesya">Muthesya</option>
+          </select>
+        </div>
+
+        <!-- REPORT TYPE (hidden, set by cards above) -->
+        <div class="form-group">
+          <label>Report Type <span>*</span></label>
+          <select id="report_type">
+            <option value="Stalled Project">🚧 Stalled Project</option>
+            <option value="White Elephant">🐘 White Elephant</option>
+            <option value="New Project">🏗️ New Project</option>
+            <option value="Substandard Work">⚠️ Substandard Work</option>
+            <option value="Completed Project">✅ Completed Project</option>
+            <option value="Other">📝 Other Issue</option>
+          </select>
+        </div>
+
+        <!-- LOCATION -->
+        <div class="form-group full">
+          <label>Project Location / Village <span>*</span></label>
+          <input type="text" id="location" placeholder="e.g. Near Kivaa Primary School, Kivaa Market area" maxlength="200"/>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="form-group full">
+          <label>Description <span>*</span></label>
+          <textarea id="description" placeholder="Describe the project, what is wrong, how long it has been stalled, who the contractor is if known…" maxlength="1000" oninput="updateCharCount(this,'descCount',1000)"></textarea>
+          <div class="char-count"><span id="descCount">0</span>/1000 characters</div>
+        </div>
+
+        <!-- GPS -->
+        <div class="form-group full">
+          <label>GPS Coordinates (optional but recommended)</label>
+          <div class="gps-row">
+            <input type="number" id="gps_lat" placeholder="Latitude e.g. -1.2345" step="any"/>
+            <input type="number" id="gps_lng" placeholder="Longitude e.g. 37.6789" step="any"/>
+            <button class="gps-btn" onclick="getGPS()">📍 Get My Location</button>
+          </div>
+          <div class="gps-status" id="gpsStatus"></div>
+        </div>
+
+        <!-- PHOTO UPLOAD -->
+        <div class="form-group full">
+          <label>Photo Evidence (optional but strongly recommended)</label>
+          <div class="photo-upload" id="photoDropzone">
+            <input type="file" id="photoFile" accept="image/*" onchange="handlePhotoSelect(this)"/>
+            <div class="photo-icon">📸</div>
+            <div class="photo-text">
+              <strong>Tap to take a photo or upload from gallery</strong>
+              JPG, PNG or WEBP · Max 5MB
+            </div>
+            <div class="photo-preview" id="photoPreview">
+              <img id="photoPreviewImg" src="" alt="Preview"/>
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:6px">💡 Tip: A GPS photo taken at the site is the strongest form of evidence</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="form-footer" id="formFooter">
+      <div class="privacy-note">🔒 Your name and phone number are kept private. Only the ward, location and description are published after verification.</div>
+      <button class="submit-btn" id="submitBtn" onclick="submitReport()">
+        <span id="submitText">Submit Report</span>
+      </button>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="success-state" id="successState">
+      <div class="success-icon">🎉</div>
+      <h2>Report Submitted!</h2>
+      <p>Thank you for holding your leaders accountable. Our verification team will visit the site within 10 days and publish the findings.</p>
+      <div class="success-ref" id="successRef">REF: —</div>
+      <br/>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:20px">Save your reference number. You can follow up via WhatsApp using this reference.</p>
+      <button class="btn-another" onclick="resetForm()">Submit Another Report</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">💡 Angazake</div>
+    <div style="font-size:0.82rem">Citizen Reports · Masinga Sub-County</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="projects.html">Projects</a>
+      <a href="roads.html">Roads</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL='https://awbozblyodzinzfhybtg.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3Ym96Ymx5b2R6aW56Zmh5YnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNTg3NzIsImV4cCI6MjA5MzkzNDc3Mn0.l6Gm9RSRbBMirGvff1hU2xgTxY6f0oEHPbSaBN6ORxs';
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
+let selectedType='Stalled Project';
+let photoBase64=null;
+
+// ── REPORT TYPE SELECTOR ────────────────────────────────────────────────────
+function selectType(card,type){
+  document.querySelectorAll('.report-type-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedType=type;
+  document.getElementById('report_type').value=type;
+}
+
+// ── CHAR COUNT ───────────────────────────────────────────────────────────────
+function updateCharCount(el,countId,max){
+  document.getElementById(countId).textContent=el.value.length;
+}
+
+// ── GPS ──────────────────────────────────────────────────────────────────────
+function getGPS(){
+  const status=document.getElementById('gpsStatus');
+  if(!navigator.geolocation){
+    status.className='gps-status error';
+    status.textContent='GPS not supported on this device.';
+    return;
+  }
+  status.className='gps-status loading';
+  status.textContent='📍 Getting your location…';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      document.getElementById('gps_lat').value=pos.coords.latitude.toFixed(6);
+      document.getElementById('gps_lng').value=pos.coords.longitude.toFixed(6);
+      status.className='gps-status success';
+      status.textContent=`✅ Location captured: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+    },
+    err=>{
+      status.className='gps-status error';
+      status.textContent='Could not get location. Please enter coordinates manually or leave blank.';
+    },
+    {enableHighAccuracy:true,timeout:10000}
+  );
+}
+
+// ── PHOTO ────────────────────────────────────────────────────────────────────
+function handlePhotoSelect(input){
+  const file=input.files[0];
+  if(!file)return;
+  if(file.size>5*1024*1024){
+    alert('Photo is too large. Please use a photo under 5MB.');
+    input.value='';
+    return;
+  }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    photoBase64=e.target.result;
+    document.getElementById('photoPreviewImg').src=photoBase64;
+    document.getElementById('photoPreview').style.display='block';
+    document.getElementById('photoDropzone').classList.add('has-file');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── GENERATE REF ─────────────────────────────────────────────────────────────
+function generateRef(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let ref='WZR-';
+  for(let i=0;i<6;i++) ref+=chars[Math.floor(Math.random()*chars.length)];
+  return ref;
+}
+
+// ── VALIDATE ─────────────────────────────────────────────────────────────────
+function validate(){
+  const required={
+    reporter_name:'Your name',
+    reporter_phone:'Phone number',
+    ward:'Ward',
+    location:'Project location',
+    description:'Description'
+  };
+  for(const[id,label] of Object.entries(required)){
+    const val=document.getElementById(id).value.trim();
+    if(!val){
+      alert(`Please fill in: ${label}`);
+      document.getElementById(id).focus();
+      return false;
+    }
+  }
+  const phone=document.getElementById('reporter_phone').value.trim();
+  if(phone.replace(/\s/g,'').length<10){
+    alert('Please enter a valid phone number.');
+    return false;
+  }
+  return true;
+}
+
+// ── SUBMIT ───────────────────────────────────────────────────────────────────
+async function submitReport(){
+  if(!validate()) return;
+
+  const btn=document.getElementById('submitBtn');
+  const btnText=document.getElementById('submitText');
+  btn.disabled=true;
+  btnText.textContent='Submitting…';
+
+  const ref=generateRef();
+
+  const payload={
+    reporter_name: document.getElementById('reporter_name').value.trim(),
+    reporter_phone: document.getElementById('reporter_phone').value.trim(),
+    ward: document.getElementById('ward').value,
+    report_type: document.getElementById('report_type').value,
+    description: document.getElementById('description').value.trim(),
+    location: document.getElementById('location').value.trim(),
+    gps_lat: document.getElementById('gps_lat').value || null,
+    gps_ing: document.getElementById('gps_lng').value || null,
+    photo_Url: photoBase64 || null,
+  };
+
+  try{
+    const{error}=await db.from('citizen_reports').insert([payload]);
+    if(error) throw error;
+
+    // Show success
+    document.getElementById('formBody').style.display='none';
+    document.getElementById('formFooter').style.display='none';
+    document.getElementById('successState').style.display='block';
+    document.getElementById('successRef').textContent=`REF: ${ref}`;
+    document.querySelector('.form-header').style.background='var(--green)';
+
+  }catch(err){
+    console.error('Submit error:',err);
+    alert('Could not submit report. Please check your connection and try again, or send your report via WhatsApp.');
+    btn.disabled=false;
+    btnText.textContent='Submit Report';
+  }
+}
+
+// ── RESET ────────────────────────────────────────────────────────────────────
+function resetForm(){
+  document.getElementById('formBody').style.display='block';
+  document.getElementById('formFooter').style.display='flex';
+  document.getElementById('successState').style.display='none';
+  document.querySelector('.form-header').style.background='var(--green)';
+  document.getElementById('reporter_name').value='';
+  document.getElementById('reporter_phone').value='';
+  document.getElementById('ward').value='';
+  document.getElementById('location').value='';
+  document.getElementById('description').value='';
+  document.getElementById('gps_lat').value='';
+  document.getElementById('gps_lng').value='';
+  document.getElementById('gpsStatus').textContent='';
+  document.getElementById('photoPreview').style.display='none';
+  document.getElementById('photoDropzone').classList.remove('has-file');
+  photoBase64=null;
+  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('submitText').textContent='Submit Report';
+  selectType(document.querySelector('.report-type-card'),'Stalled Project');
+}
+</script>
+</body>
+</html>
