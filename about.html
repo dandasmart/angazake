@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>About — Angazake</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--ink:#0d1117;--paper:#f9f7f2;--green:#1a6b3c;--green-light:#e8f4ed;--gold:#c8860a;--gold-light:#fdf3e0;--red:#c0392b;--blue:#1a4a7a;--muted:#6b7280;--border:#e2ddd6;--card:#ffffff;--radius:12px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(249,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5vw}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-brand span{background:var(--green);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.8rem}
+.nav-links{display:flex;gap:20px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:0.85rem;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.nav-back{font-size:0.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--green)}
+
+/* HERO */
+.about-hero{background:var(--ink);color:#fff;padding:72px 5vw}
+.about-hero-inner{max-width:800px;margin:0 auto;text-align:center}
+.hero-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af;margin-bottom:12px}
+.about-hero h1{font-family:'Sora',sans-serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.1;margin-bottom:16px}
+.about-hero h1 em{font-style:normal;color:#86efac}
+.about-hero p{color:#9ca3af;font-size:1rem;max-width:560px;margin:0 auto 32px}
+.hero-pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.hero-pill{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);padding:6px 16px;border-radius:99px;font-size:0.8rem;color:#d1fae5}
+
+/* MISSION */
+.mission-section{background:var(--green);color:#fff;padding:64px 5vw}
+.mission-inner{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.mission-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#86efac;margin-bottom:12px}
+.mission-inner h2{font-family:'Sora',sans-serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;line-height:1.2;margin-bottom:16px}
+.mission-inner p{color:rgba(255,255,255,0.8);font-size:0.95rem;line-height:1.7;margin-bottom:12px}
+.mission-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mission-stat{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:20px;text-align:center}
+.mission-stat-num{font-family:'Sora',sans-serif;font-size:2rem;font-weight:800;color:#fff}
+.mission-stat-label{font-size:0.78rem;color:rgba(255,255,255,0.7);margin-top:4px}
+
+/* HOW IT WORKS */
+.section{padding:64px 5vw}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:8px}
+.section-title{font-family:'Sora',sans-serif;font-size:clamp(1.6rem,3vw,2rem);font-weight:700;margin-bottom:12px}
+.section-desc{color:var(--muted);font-size:0.95rem;max-width:560px;margin-bottom:40px}
+
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.step{text-align:center;padding:24px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+.step-num{width:48px;height:48px;border-radius:50%;background:var(--green);color:#fff;font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.step h3{font-family:'Sora',sans-serif;font-weight:700;font-size:0.95rem;margin-bottom:8px}
+.step p{font-size:0.8rem;color:var(--muted);line-height:1.5}
+.step-icon{font-size:1.8rem;margin-bottom:12px}
+
+/* CHANNELS */
+.channels-section{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:64px 5vw}
+.channels-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:40px}
+.channel{border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:box-shadow .2s}
+.channel:hover{box-shadow:0 4px 20px rgba(0,0,0,0.07)}
+.channel-icon{font-size:2.2rem;margin-bottom:12px}
+.channel h3{font-family:'Sora',sans-serif;font-weight:700;font-size:0.95rem;margin-bottom:8px}
+.channel p{font-size:0.8rem;color:var(--muted);line-height:1.5;margin-bottom:12px}
+.channel-badge{font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--green-light);color:var(--green)}
+
+/* VALUES */
+.values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
+.value-card{padding:28px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card)}
+.value-icon{font-size:2rem;margin-bottom:12px}
+.value-card h3{font-family:'Sora',sans-serif;font-weight:700;font-size:1rem;margin-bottom:8px}
+.value-card p{font-size:0.83rem;color:var(--muted);line-height:1.6}
+
+/* TEAM */
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;margin-top:40px}
+.team-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;text-align:center}
+.team-avatar{width:64px;height:64px;border-radius:50%;background:var(--green-light);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+.team-name{font-family:'Sora',sans-serif;font-weight:700;font-size:0.92rem;margin-bottom:4px}
+.team-role{font-size:0.75rem;color:var(--muted)}
+
+/* CONTACT */
+.contact-section{background:var(--ink);color:#fff;padding:64px 5vw}
+.contact-inner{max-width:900px;margin:0 auto}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px}
+.contact-box{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius);padding:28px}
+.contact-box h3{font-family:'Sora',sans-serif;font-weight:700;font-size:1rem;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.contact-item{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.contact-item-icon{font-size:1.2rem;flex-shrink:0}
+.contact-item-text{font-size:0.85rem;color:#9ca3af}
+.contact-item-text strong{display:block;color:#fff;margin-bottom:2px;font-size:0.88rem}
+.contact-cta{margin-top:20px}
+.wa-btn{display:inline-flex;align-items:center;gap:8px;background:#25d366;color:#fff;padding:12px 24px;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none;transition:opacity .2s}
+.wa-btn:hover{opacity:0.88}
+.placeholder{background:rgba(255,255,255,0.05);border:1px dashed rgba(255,255,255,0.2);border-radius:8px;padding:12px 16px;font-size:0.8rem;color:#6b7280;font-style:italic}
+
+/* LEGAL */
+.legal-section{padding:40px 5vw;background:var(--paper);border-top:1px solid var(--border)}
+.legal-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px}
+.legal-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
+.legal-card h4{font-family:'Sora',sans-serif;font-weight:700;font-size:0.88rem;margin-bottom:8px;color:var(--ink)}
+.legal-card p{font-size:0.78rem;color:var(--muted);line-height:1.5}
+
+footer{background:var(--ink);color:#9ca3af;padding:32px 5vw}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:'Sora',sans-serif;font-weight:800;color:#fff;font-size:1rem}
+.footer-links a{font-size:0.82rem;color:#9ca3af;text-decoration:none;margin-left:20px;transition:color .2s}
+.footer-links a:hover{color:#fff}
+
+@media(max-width:768px){
+  .mission-inner,.contact-grid,.steps-grid,.channels-grid{grid-template-columns:1fr}
+  .values-grid{grid-template-columns:1fr}
+  .legal-inner{grid-template-columns:1fr}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">💡 Angazake <span>PILOT</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="search.html">🔍 Search</a></li>
+      <li><a href="report.html">📸 Report</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+    </ul>
+    <a class="nav-back" href="index.html">← Home</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="about-hero">
+  <div class="about-hero-inner">
+    <div class="hero-tag">About Angazake</div>
+    <h1>Built for <em>every citizen</em><br/>of Masinga.</h1>
+    <p>Angazake is Kenya's first sub-county accountability platform — putting verified, real-time public project data in the hands of every citizen, from Kivaa to Muthesya.</p>
+    <div class="hero-pills">
+      <span class="hero-pill">🌐 Website</span>
+      <span class="hero-pill">📲 Mobile App</span>
+      <span class="hero-pill">💬 WhatsApp Bot</span>
+      <span class="hero-pill">📞 USSD *XXX#</span>
+      <span class="hero-pill">✅ Verified Data</span>
+      <span class="hero-pill">🆓 Free Forever</span>
+    </div>
+  </div>
+</div>
+
+<!-- MISSION -->
+<div class="mission-section">
+  <div class="mission-inner">
+    <div>
+      <div class="mission-tag">Our Mission</div>
+      <h2>Transparency. Accountability. Action.</h2>
+      <p>Every year, billions of shillings are allocated to Masinga Sub-County through CDF, Ward Development Funds, County and National Government budgets. Yet most citizens have no way to know what was built, what stalled, or where the money went.</p>
+      <p>Angazake changes that. We track every project, verify every claim, and publish everything — so that every citizen, every journalist, and every leader knows exactly what is happening in their ward.</p>
+      <p style="color:#86efac;font-weight:600;margin-top:8px">"Wazi. Sasa. Kwa Wote." — Open. Now. For All.</p>
+    </div>
+    <div class="mission-stats">
+      <div class="mission-stat"><div class="mission-stat-num">21</div><div class="mission-stat-label">Accountability trackers</div></div>
+      <div class="mission-stat"><div class="mission-stat-num">5</div><div class="mission-stat-label">Wards covered</div></div>
+      <div class="mission-stat"><div class="mission-stat-num">4</div><div class="mission-stat-label">Access channels</div></div>
+      <div class="mission-stat"><div class="mission-stat-num">~65K</div><div class="mission-stat-label">Citizens served</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW VERIFICATION WORKS -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-tag">Data Integrity</div>
+    <div class="section-title">How we verify every record</div>
+    <p class="section-desc">We don't just publish what we're told. Every project goes through a rigorous verification process before it goes live.</p>
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-icon">📝</div>
+        <div class="step-num">1</div>
+        <h3>Citizen Submission</h3>
+        <p>Any citizen submits a project report with location, description and photo via app, website or WhatsApp.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">🔍</div>
+        <div class="step-num">2</div>
+        <h3>Initial Review</h3>
+        <p>Our team reviews the submission for completeness within 48 hours and cross-checks against official records.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">📍</div>
+        <div class="step-num">3</div>
+        <h3>Site Verification</h3>
+        <p>A trained Wazi Verification Agent visits the physical site, takes GPS-tagged photos and confirms all details.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">✅</div>
+        <div class="step-num">4</div>
+        <h3>Published Live</h3>
+        <p>Verified records go live on all four channels — website, app, WhatsApp and USSD — within 10 days.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHANNELS -->
+<div class="channels-section">
+  <div class="section-inner">
+    <div class="section-tag">Access</div>
+    <div class="section-title">Four ways to access Angazake</div>
+    <p class="section-desc">All four channels connect to the same verified database — the same data, every time.</p>
+    <div class="channels-grid">
+      <div class="channel">
+        <div class="channel-icon">🌐</div>
+        <h3>Website</h3>
+        <p>Full dashboards, maps, search, reports and analytics. Best for research and detailed queries.</p>
+        <span class="channel-badge">Internet required</span>
+      </div>
+      <div class="channel">
+        <div class="channel-icon">📲</div>
+        <h3>Mobile App</h3>
+        <p>GPS reporting, photo uploads, push notifications and offline access. Best for field use.</p>
+        <span class="channel-badge">Coming soon</span>
+      </div>
+      <div class="channel">
+        <div class="channel-icon">💬</div>
+        <h3>WhatsApp Bot</h3>
+        <p>Natural language queries in English and Kiswahili. Works on any smartphone with WhatsApp.</p>
+        <span class="channel-badge">Low data</span>
+      </div>
+      <div class="channel">
+        <div class="channel-icon">📞</div>
+        <h3>USSD *XXX#</h3>
+        <p>No internet needed. Works on any phone including feature phones on any network.</p>
+        <span class="channel-badge">Coming soon</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VALUES -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-tag">Our Values</div>
+    <div class="section-title">What we stand for</div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">🔍</div>
+        <h3>Radical Transparency</h3>
+        <p>Every record, every source, every verification step is open and auditable. We never publish unverified data as fact.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">⚖️</div>
+        <h3>Political Independence</h3>
+        <p>Angazake is not affiliated with any political party or candidate. We track all leaders equally — CDF, MCA, Governor, MP and Senator.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🤝</div>
+        <h3>Citizen First</h3>
+        <p>The platform is free for all citizens. We will never charge a citizen to access public information about public funds.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🌍</div>
+        <h3>Inclusivity</h3>
+        <p>We actively track marginalised wards and flag areas receiving fewer projects — so no community is left behind silently.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔒</div>
+        <h3>Data Privacy</h3>
+        <p>Citizen reporter identities are kept private. We comply with Kenya's Data Protection Act 2019 and ODPC guidelines.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">📈</div>
+        <h3>Continuous Improvement</h3>
+        <p>We update records quarterly, welcome corrections from officials and citizens, and publish our own performance metrics.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="section" style="background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="section-tag">The Team</div>
+    <div class="section-title">Who runs Angazake</div>
+    <p class="section-desc">A lean, committed team of technologists, community organisers and accountability advocates.</p>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar">👨‍💼</div>
+        <div class="team-name">Executive Director</div>
+        <div class="team-role">Strategy & Government Relations</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">👩‍💻</div>
+        <div class="team-name">Technology Lead</div>
+        <div class="team-role">Platform Development & Data</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">👨‍🌾</div>
+        <div class="team-name">Field Coordinator</div>
+        <div class="team-role">Verification Agent Network</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">👩‍📋</div>
+        <div class="team-name">Community Manager</div>
+        <div class="team-role">Citizen Engagement & WhatsApp</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">🧑‍⚖️</div>
+        <div class="team-name">Legal Counsel</div>
+        <div class="team-role">Compliance & Content Policy</div>
+      </div>
+      <div class="team-card" style="border-style:dashed;background:var(--paper)">
+        <div class="team-avatar" style="background:#f3f4f6">➕</div>
+        <div class="team-name" style="color:var(--muted)">Join the Team</div>
+        <div class="team-role">We are hiring WVAs in all 5 wards</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<div class="contact-section">
+  <div class="contact-inner">
+    <div class="section-tag" style="color:#86efac">Get in Touch</div>
+    <div class="section-title" style="color:#fff">Contact Angazake</div>
+    <div class="contact-grid">
+      <div class="contact-box">
+        <h3>💬 WhatsApp & General</h3>
+        <div class="contact-item">
+          <div class="contact-item-icon">📱</div>
+          <div class="contact-item-text">
+            <strong>WhatsApp Number</strong>
+            <div class="placeholder">To be added — contact admin</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon">📧</div>
+          <div class="contact-item-text">
+            <strong>Email Address</strong>
+            <div class="placeholder">To be added — contact admin</div>
+          </div>
+        </div>
+        <div class="contact-cta">
+          <a href="https://wa.me/254700000000" class="wa-btn">💬 Chat on WhatsApp</a>
+        </div>
+      </div>
+      <div class="contact-box">
+        <h3>🤝 Partnerships & Media</h3>
+        <div class="contact-item">
+          <div class="contact-item-icon">🏛️</div>
+          <div class="contact-item-text">
+            <strong>For Government Officials</strong>
+            Want to partner or add official data? Contact us to set up a data MOU.
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon">📰</div>
+          <div class="contact-item-text">
+            <strong>For Journalists & Researchers</strong>
+            We provide data exports and custom reports for verified media organisations.
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon">💰</div>
+          <div class="contact-item-text">
+            <strong>For Donors & Partners</strong>
+            Angazake is seeking grant funding and CSR partnerships to expand county-wide.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEGAL -->
+<div class="legal-section">
+  <div class="legal-inner">
+    <div class="legal-card">
+      <h4>⚖️ Legal Framework</h4>
+      <p>Angazake operates under Kenya's Access to Information Act 2016, Data Protection Act 2019, and the Constitution of Kenya 2010 (Article 35 — Right to Information).</p>
+    </div>
+    <div class="legal-card">
+      <h4>🔒 Data Policy</h4>
+      <p>Citizen reporter details are never published. All project data is sourced from public records or verified field visits. Right of reply is available to named contractors and officials.</p>
+    </div>
+    <div class="legal-card">
+      <h4>📍 Pilot Status</h4>
+      <p>Angazake is currently in pilot phase covering Masinga Sub-County, Machakos County. Full county rollout is planned for 2027 subject to funding and verification capacity.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">💡 Angazake</div>
+    <div style="font-size:0.82rem">Wazi. Sasa. Kwa Wote. · Masinga Sub-County Pilot 2026</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="projects.html">Projects</a>
+      <a href="report.html">Report</a>
+      <a href="search.html">Search</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
