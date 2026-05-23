@@ -430,23 +430,26 @@ async function submitReport(){
   const ref=generateRef();
 
   const payload={
-    reporter_name: document.getElementById('reporter_name').value.trim(),
-    reporter_phone: document.getElementById('reporter_phone').value.trim(),
-    ward: document.getElementById('ward').value,
-    report_type: document.getElementById('report_type').value,
-    description: document.getElementById('description').value.trim(),
-    location: document.getElementById('location').value.trim(),
-    gps_lat: document.getElementById('gps_lat').value || null,
-    gps_lng: document.getElementById('gps_lng').value || null,
-    photo_Url: photoBase64 || null,
-    status: 'Pending',
-    reference_number: ref,
-    date_reported: new Date().toISOString(),
+    Reporter_Name: document.getElementById('reporter_name').value.trim(),
+    Reporter_phone: document.getElementById('reporter_phone').value.trim(),
+    Ward: document.getElementById('ward').value,
+    Report_type: document.getElementById('report_type').value,
+    Description: document.getElementById('description').value.trim(),
+    Location: document.getElementById('location').value.trim(),
+    gps_lat: document.getElementById('gps_lat').value ? Number(document.getElementById('gps_lat').value) : null,
+    gps_lng: document.getElementById('gps_lng').value ? Number(document.getElementById('gps_lng').value) : null,
+    Photo_Url: photoBase64 || null,
+    Status: 'Pending',
+    Reference_Number: ref,
+    Date_reported: new Date().toISOString().split('T')[0],
   };
 
   try{
     const{error}=await db.from('citizen_reports').insert([payload]);
-    if(error) throw error;
+    if(error){
+      console.error('Supabase insert error:', JSON.stringify(error));
+      throw error;
+    }
 
     // Show success
     document.getElementById('formBody').style.display='none';
