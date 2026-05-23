@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Search — Angazake</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0d1117;--paper:#f9f7f2;--green:#1a6b3c;--green-light:#e8f4ed;--gold:#c8860a;--red:#c0392b;--blue:#1a4a7a;--muted:#6b7280;--border:#e2ddd6;--card:#ffffff;--radius:12px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(249,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5vw}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-brand span{background:var(--green);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.8rem}
+.nav-links{display:flex;gap:20px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:0.85rem;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.nav-back{font-size:0.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--green)}
+
+/* SEARCH HERO */
+.search-hero{background:var(--ink);padding:56px 5vw 80px}
+.search-hero-inner{max-width:800px;margin:0 auto;text-align:center}
+.search-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af;margin-bottom:12px}
+.search-hero h1{font-family:'Sora',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:#fff;margin-bottom:12px}
+.search-hero p{color:#9ca3af;font-size:0.95rem;margin-bottom:32px}
+.search-box{display:flex;gap:0;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.search-box input{flex:1;padding:16px 20px;border:none;font-family:inherit;font-size:1rem;color:var(--ink);outline:none}
+.search-box button{background:var(--green);color:#fff;padding:16px 28px;border:none;font-weight:700;font-size:0.95rem;cursor:pointer;font-family:inherit;transition:opacity .2s;white-space:nowrap}
+.search-box button:hover{opacity:0.88}
+.search-hint{margin-top:12px;font-size:0.8rem;color:#6b7280;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.search-hint span{background:rgba(255,255,255,0.08);padding:4px 12px;border-radius:99px;cursor:pointer;transition:background .2s}
+.search-hint span:hover{background:rgba(255,255,255,0.15)}
+
+/* FILTER TABS */
+.filter-tabs{max-width:1200px;margin:-28px auto 0;padding:0 5vw;position:relative;z-index:10}
+.tabs-row{display:flex;gap:8px;flex-wrap:wrap}
+.tab{padding:10px 18px;border-radius:99px;border:1px solid var(--border);background:var(--card);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.tab:hover{border-color:var(--green);color:var(--green)}
+.tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+.tab-count{background:rgba(255,255,255,0.25);padding:1px 7px;border-radius:99px;font-size:0.72rem}
+.tab.active .tab-count{background:rgba(255,255,255,0.3)}
+.tab:not(.active) .tab-count{background:#f3f4f6;color:var(--muted)}
+
+/* RESULTS */
+.results-section{max-width:1200px;margin:32px auto;padding:0 5vw 60px}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.results-count{font-size:0.88rem;color:var(--muted)}
+.results-count strong{color:var(--ink);font-size:1rem}
+
+/* RESULT CARD */
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:12px;display:flex;gap:16px;align-items:flex-start;transition:box-shadow .2s;text-decoration:none;color:inherit}
+.result-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.08);border-color:var(--green)}
+.result-icon{font-size:1.8rem;flex-shrink:0;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:var(--paper);border-radius:10px}
+.result-body{flex:1;min-width:0}
+.result-type{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.result-name{font-family:'Sora',sans-serif;font-weight:700;font-size:0.97rem;margin-bottom:6px;line-height:1.3}
+.result-meta{display:flex;gap:12px;flex-wrap:wrap;font-size:0.78rem;color:var(--muted)}
+.result-meta span{display:flex;align-items:center;gap:4px}
+.result-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.73rem;font-weight:600;white-space:nowrap}
+.s-complete,.s-approved,.s-disbursed,.s-delivered{background:#dcfce7;color:#166534}
+.s-ongoing,.s-progress,.s-pending,.s-partial{background:#fef9c3;color:#854d0e}
+.s-stalled,.s-rejected,.s-delayed,.s-notdelivered{background:#fee2e2;color:#991b1b}
+.s-default{background:#f3f4f6;color:#374151}
+.result-cost{font-family:'Sora',sans-serif;font-size:0.85rem;font-weight:700;color:var(--ink)}
+
+/* TYPE COLORS */
+.type-project{color:var(--green)}
+.type-road{color:var(--blue)}
+.type-bursary{color:#7c3aed}
+.type-health{color:#dc2626}
+.type-school{color:#d97706}
+.type-water{color:#0891b2}
+.type-promise{color:#c026d3}
+
+/* EMPTY / LOADING */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:3.5rem;margin-bottom:16px}
+.empty-state h3{font-family:'Sora',sans-serif;font-size:1.1rem;color:var(--ink);margin-bottom:8px}
+.empty-state p{font-size:0.88rem;max-width:360px;margin:0 auto}
+.initial-state{text-align:center;padding:60px 20px}
+.initial-icon{font-size:4rem;margin-bottom:20px}
+.initial-state h3{font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:12px}
+.quick-searches{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+.quick-search{background:var(--card);border:1px solid var(--border);padding:8px 16px;border-radius:99px;font-size:0.82rem;cursor:pointer;transition:all .2s}
+.quick-search:hover{border-color:var(--green);color:var(--green)}
+.loading-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SECTIONS */
+.section-divider{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:8px 0 12px;border-bottom:1px solid var(--border);margin-bottom:12px}
+
+footer{background:var(--ink);color:#9ca3af;padding:32px 5vw;margin-top:20px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:'Sora',sans-serif;font-weight:800;color:#fff;font-size:1rem}
+.footer-links a{font-size:0.82rem;color:#9ca3af;text-decoration:none;margin-left:20px;transition:color .2s}
+.footer-links a:hover{color:#fff}
+
+@media(max-width:768px){.nav-links{display:none}.search-box{flex-direction:column;border-radius:10px}.search-box button{border-radius:0 0 10px 10px}.result-card{flex-direction:column}.result-right{flex-direction:row;align-items:center}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">💡 Angazake <span>PILOT</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="roads.html">Roads</a></li>
+      <li><a href="search.html" class="active">Search</a></li>
+      <li><a href="report.html">📸 Report</a></li>
+    </ul>
+    <a class="nav-back" href="index.html">← Home</a>
+  </div>
+</nav>
+
+<!-- SEARCH HERO -->
+<div class="search-hero">
+  <div class="search-hero-inner">
+    <div class="search-tag">Masinga Sub-County · All Records</div>
+    <h1>🔍 Search Everything</h1>
+    <p>Search across all projects, roads, bursaries, health facilities, schools, water projects and promises in one place.</p>
+    <div class="search-box">
+      <input type="text" id="globalSearch" placeholder="Search by name, ward, contractor, school, student…" autocomplete="off"/>
+      <button onclick="runSearch()">Search</button>
+    </div>
+    <div class="search-hint">
+      <span onclick="quickSearch('Kivaa')">📍 Kivaa</span>
+      <span onclick="quickSearch('Masinga Central')">📍 Masinga Central</span>
+      <span onclick="quickSearch('Ndithini')">📍 Ndithini</span>
+      <span onclick="quickSearch('Ekalakala')">📍 Ekalakala</span>
+      <span onclick="quickSearch('Muthesya')">📍 Muthesya</span>
+      <span onclick="quickSearch('Stalled')">🚧 Stalled</span>
+      <span onclick="quickSearch('CDF')">💰 CDF</span>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER TABS -->
+<div class="filter-tabs">
+  <div class="tabs-row">
+    <div class="tab active" onclick="filterTab('all')" id="tab-all">🔍 All Results <span class="tab-count" id="count-all">0</span></div>
+    <div class="tab" onclick="filterTab('project')" id="tab-project">🏗️ Projects <span class="tab-count" id="count-project">0</span></div>
+    <div class="tab" onclick="filterTab('road')" id="tab-road">🛣️ Roads <span class="tab-count" id="count-road">0</span></div>
+    <div class="tab" onclick="filterTab('bursary')" id="tab-bursary">📚 Bursaries <span class="tab-count" id="count-bursary">0</span></div>
+    <div class="tab" onclick="filterTab('health')" id="tab-health">🏥 Health <span class="tab-count" id="count-health">0</span></div>
+    <div class="tab" onclick="filterTab('school')" id="tab-school">🏫 Schools <span class="tab-count" id="count-school">0</span></div>
+    <div class="tab" onclick="filterTab('water')" id="tab-water">💧 Water <span class="tab-count" id="count-water">0</span></div>
+    <div class="tab" onclick="filterTab('promise')" id="tab-promise">🤝 Promises <span class="tab-count" id="count-promise">0</span></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results-section">
+  <div class="results-header" id="resultsHeader" style="display:none">
+    <div class="results-count" id="resultsCount"></div>
+  </div>
+  <div id="resultsContainer">
+    <!-- INITIAL STATE -->
+    <div class="initial-state" id="initialState">
+      <div class="initial-icon">🔍</div>
+      <h3>Search across all Angazake records</h3>
+      <p style="color:var(--muted);font-size:0.88rem">Type a name, ward, contractor, school, or student name above to search everything at once.</p>
+      <div class="quick-searches">
+        <div class="quick-search" onclick="quickSearch('road')">🛣️ All Roads</div>
+        <div class="quick-search" onclick="quickSearch('bursary')">📚 Bursaries</div>
+        <div class="quick-search" onclick="quickSearch('hospital')">🏥 Hospitals</div>
+        <div class="quick-search" onclick="quickSearch('water')">💧 Water</div>
+        <div class="quick-search" onclick="quickSearch('school')">🏫 Schools</div>
+        <div class="quick-search" onclick="quickSearch('stalled')">🚧 Stalled</div>
+        <div class="quick-search" onclick="quickSearch('complete')">✅ Completed</div>
+        <div class="quick-search" onclick="quickSearch('CDF')">💰 CDF Projects</div>
+      </div>
+    </div>
+    <div class="loading-state" id="loadingState" style="display:none">
+      <div class="spinner"></div>
+      <p>Searching all records…</p>
+    </div>
+    <div id="resultsList"></div>
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="empty-icon">🔎</div>
+      <h3>No results found</h3>
+      <p>Try a different search term, or browse by ward using the ward dashboards.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">💡 Angazake</div>
+    <div style="font-size:0.82rem">Global Search · Masinga Sub-County</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="projects.html">Projects</a>
+      <a href="report.html">Report</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL='https://awbozblyodzinzfhybtg.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3Ym96Ymx5b2R6aW56Zmh5YnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNTg3NzIsImV4cCI6MjA5MzkzNDc3Mn0.l6Gm9RSRbBMirGvff1hU2xgTxY6f0oEHPbSaBN6ORxs';
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
+let allResults=[];
+let activeTab='all';
+
+function statusBadge(s){
+  if(!s)return'<span class="status-badge s-default">Unknown</span>';
+  const l=s.toLowerCase();
+  const cl=l.includes('complet')||l.includes('approv')||l.includes('disburse')||l.includes('deliver')?'s-complete':
+            l.includes('ongo')||l.includes('progress')||l.includes('partial')?'s-ongoing':
+            l.includes('stall')||l.includes('reject')||l.includes('delay')?'s-stalled':
+            l.includes('pend')?'s-pending':'s-default';
+  return`<span class="status-badge ${cl}">${s}</span>`;
+}
+
+function formatCost(n){
+  if(!n)return null;
+  const num=Number(n);
+  if(num>=1000000)return`KES ${(num/1000000).toFixed(1)}M`;
+  if(num>=1000)return`KES ${(num/1000).toFixed(0)}K`;
+  return`KES ${num.toLocaleString()}`;
+}
+
+// ── SEARCH ALL TABLES ────────────────────────────────────────────────────────
+async function runSearch(){
+  const q=document.getElementById('globalSearch').value.trim();
+  if(!q)return;
+
+  document.getElementById('initialState').style.display='none';
+  document.getElementById('loadingState').style.display='block';
+  document.getElementById('resultsList').innerHTML='';
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('resultsHeader').style.display='none';
+
+  const results=[];
+
+  // 1. PROJECTS
+  try{
+    const{data}=await db.from('projects').select('Name,Ward,Type,Funder,Cost,Status,Completion_pct,Contractor')
+      .or(`Name.ilike.%${q}%,Ward.ilike.%${q}%,Contractor.ilike.%${q}%,Funder.ilike.%${q}%,Status.ilike.%${q}%`);
+    (data||[]).forEach(r=>results.push({type:'project',icon:'🏗️',name:r.Name||'Unnamed Project',ward:r.Ward,meta:[r.Type,r.Funder,r.Contractor].filter(Boolean),status:r.Status,cost:r.Cost,pct:r.Completion_pct}));
+  }catch(e){}
+
+  // 2. ROADS
+  try{
+    const{data}=await db.from('Roads').select('Name,Ward,Road_type,Funder,Cost,Status,Contractor,km_length')
+      .or(`Name.ilike.%${q}%,Ward.ilike.%${q}%,Contractor.ilike.%${q}%,Road_type.ilike.%${q}%,Status.ilike.%${q}%`);
+    (data||[]).forEach(r=>results.push({type:'road',icon:'🛣️',name:r.Name||'Unnamed Road',ward:r.Ward,meta:[r.Road_type,r.km_length?`${r.km_length}km`:null,r.Funder].filter(Boolean),status:r.Status,cost:r.Cost}));
+  }catch(e){}
+
+  // 3. BURSARIES
+  try{
+    const[r1,r2,r3,r4]=await Promise.all([
+      db.from('bursaries').select('student_name,ward,school,admission_no,amount,status,term,year').ilike('student_name',`%${q}%`),
+      db.from('bursaries').select('student_name,ward,school,admission_no,amount,status,term,year').ilike('ward',`%${q}%`),
+      db.from('bursaries').select('student_name,ward,school,admission_no,amount,status,term,year').ilike('school',`%${q}%`),
+      db.from('bursaries').select('student_name,ward,school,admission_no,amount,status,term,year').ilike('admission_no',`%${q}%`),
+    ]);
+    const seen=new Set();
+    [...(r1.data||[]),(r2.data||[]),(r3.data||[]),(r4.data||[])].flat().forEach(r=>{
+      const key=`${r.student_name}-${r.admission_no}`;
+      if(!seen.has(key)){seen.add(key);results.push({type:'bursary',icon:'📚',name:r.student_name||'Unknown Student',ward:r.ward,meta:[r.school,r.admission_no,r.term&&r.year?`${r.term}/${r.year}`:null].filter(Boolean),status:r.status,cost:r.amount});}
+    });
+  }catch(e){}
+
+  // 4. HEALTH FACILITIES
+  try{
+    const{data}=await db.from('health_facilities').select('Name,Ward,Type,Funder,Cost,Status,Contractor')
+      .or(`Name.ilike.%${q}%,Ward.ilike.%${q}%,Contractor.ilike.%${q}%,Type.ilike.%${q}%,Status.ilike.%${q}%`);
+    (data||[]).forEach(r=>results.push({type:'health',icon:'🏥',name:r.Name||'Health Facility',ward:r.Ward,meta:[r.Type,r.Funder,r.Contractor].filter(Boolean),status:r.Status,cost:r.Cost}));
+  }catch(e){}
+
+  // 5. SCHOOLS
+  try{
+    const{data}=await db.from('schools').select('name,ward,type,funder,cost,status,contractor')
+      .or(`name.ilike.%${q}%,ward.ilike.%${q}%,contractor.ilike.%${q}%,type.ilike.%${q}%,status.ilike.%${q}%`);
+    (data||[]).forEach(r=>results.push({type:'school',icon:'🏫',name:r.name||'School Project',ward:r.ward,meta:[r.type,r.funder,r.contractor].filter(Boolean),status:r.status,cost:r.cost}));
+  }catch(e){}
+
+  // 6. WATER PROJECTS
+  try{
+    const{data}=await db.from('water_projects').select('Name,Ward,Type,Funder,Cost,Status,Contractor,Households_served')
+      .or(`Name.ilike.%${q}%,Ward.ilike.%${q}%,Contractor.ilike.%${q}%,Type.ilike.%${q}%,Status.ilike.%${q}%`);
+    (data||[]).forEach(r=>results.push({type:'water',icon:'💧',name:r.Name||'Water Project',ward:r.Ward,meta:[r.Type,r.Funder,r.Households_served?`${r.Households_served} HHs`:null].filter(Boolean),status:r.Status,cost:r.Cost}));
+  }catch(e){}
+
+  // 7. PROMISES
+  try{
+    const{data}=await db.from('promises').select('Promise,Made_by,Ward,Category,Status,Deadline')
+      .or(`Promise.ilike.%${q}%,Made_by.ilike.%${q}%,Ward.ilike.%${q}%,Category.ilike.%${q}%,Status.ilike.%${q}%`);
+    (data||[]).forEach(r=>results.push({type:'promise',icon:'🤝',name:r.Promise||'Promise',ward:r.Ward,meta:[r.Made_by,r.Category,r.Deadline?`Deadline: ${r.Deadline}`:null].filter(Boolean),status:r.Status,cost:null}));
+  }catch(e){}
+
+  allResults=results;
+  document.getElementById('loadingState').style.display='none';
+  updateTabCounts(results);
+  renderResults(results);
+}
+
+// ── UPDATE TAB COUNTS ────────────────────────────────────────────────────────
+function updateTabCounts(results){
+  const types=['project','road','bursary','health','school','water','promise'];
+  document.getElementById('count-all').textContent=results.length;
+  types.forEach(t=>{
+    const el=document.getElementById(`count-${t}`);
+    if(el) el.textContent=results.filter(r=>r.type===t).length;
+  });
+}
+
+// ── FILTER TAB ───────────────────────────────────────────────────────────────
+function filterTab(tab){
+  activeTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  const filtered=tab==='all'?allResults:allResults.filter(r=>r.type===tab);
+  renderResults(filtered);
+}
+
+// ── RENDER RESULTS ───────────────────────────────────────────────────────────
+function renderResults(results){
+  const list=document.getElementById('resultsList');
+  const header=document.getElementById('resultsHeader');
+  const empty=document.getElementById('emptyState');
+  const countEl=document.getElementById('resultsCount');
+
+  header.style.display='flex';
+  countEl.innerHTML=`Found <strong>${results.length}</strong> result${results.length!==1?'s':''}`;
+
+  if(!results.length){
+    list.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+
+  // Group by type
+  const typeLabels={project:'🏗️ Projects',road:'🛣️ Roads',bursary:'📚 Bursaries',health:'🏥 Health Facilities',school:'🏫 Schools & Education',water:'💧 Water Projects',promise:'🤝 Promises'};
+  const grouped={};
+  results.forEach(r=>{
+    if(!grouped[r.type]) grouped[r.type]=[];
+    grouped[r.type].push(r);
+  });
+
+  let html='';
+  for(const[type,items] of Object.entries(grouped)){
+    if(activeTab!=='all'){
+      html+=items.map(r=>resultCard(r)).join('');
+    } else {
+      html+=`<div class="section-divider">${typeLabels[type]||type} (${items.length})</div>`;
+      html+=items.map(r=>resultCard(r)).join('');
+    }
+  }
+  list.innerHTML=html;
+}
+
+function resultCard(r){
+  const cost=r.cost?formatCost(r.cost):'';
+  const wardLink=r.ward?`<a href="${wardSlug(r.ward)}.html" style="color:var(--green);text-decoration:none">📍 ${r.ward}</a>`:'';
+  return`<div class="result-card">
+    <div class="result-icon">${r.icon}</div>
+    <div class="result-body">
+      <div class="result-type type-${r.type}">${r.type.toUpperCase()}</div>
+      <div class="result-name">${r.name}</div>
+      <div class="result-meta">
+        ${wardLink?`<span>${wardLink}</span>`:''}
+        ${r.meta.map(m=>`<span>${m}</span>`).join('')}
+      </div>
+    </div>
+    <div class="result-right">
+      ${statusBadge(r.status)}
+      ${cost?`<div class="result-cost">${cost}</div>`:''}
+    </div>
+  </div>`;
+}
+
+function wardSlug(ward){
+  if(!ward)return'index';
+  const w=ward.toLowerCase();
+  if(w.includes('masinga'))return'masinga-central';
+  if(w.includes('kivaa'))return'kivaa';
+  if(w.includes('ndithini'))return'ndithini';
+  if(w.includes('ekalakala'))return'ekalakala';
+  if(w.includes('muthesya'))return'muthesya';
+  return'index';
+}
+
+function quickSearch(term){
+  document.getElementById('globalSearch').value=term;
+  runSearch();
+}
+
+document.getElementById('globalSearch').addEventListener('keydown',e=>{
+  if(e.key==='Enter') runSearch();
+});
+
+// Auto-search if URL has query param
+const urlParams=new URLSearchParams(window.location.search);
+const urlQ=urlParams.get('q');
+if(urlQ){
+  document.getElementById('globalSearch').value=urlQ;
+  runSearch();
+}
+</script>
+</body>
+</html>
