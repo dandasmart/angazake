@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Parliament & Bills — Angazake</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0d1117;--paper:#f9f7f2;--green:#1a6b3c;--green-light:#e8f4ed;--gold:#c8860a;--gold-light:#fdf3e0;--red:#c0392b;--blue:#1a4a7a;--purple:#6d28d9;--muted:#6b7280;--border:#e2ddd6;--card:#ffffff;--radius:12px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(249,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5vw}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-brand span{background:var(--green);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.8rem}
+.nav-links{display:flex;gap:20px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:0.85rem;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.nav-back{font-size:0.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--green)}
+
+/* HERO */
+.page-hero{background:var(--blue);color:#fff;padding:56px 5vw}
+.page-hero-inner{max-width:1100px;margin:0 auto}
+.page-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px}
+.page-hero h1{font-family:'Sora',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.1;margin-bottom:12px}
+.page-hero p{color:rgba(255,255,255,0.75);font-size:0.95rem;max-width:580px;margin-bottom:24px}
+.hero-links{display:flex;gap:12px;flex-wrap:wrap}
+.hero-link{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 16px;border-radius:8px;font-size:0.82rem;font-weight:600;text-decoration:none;transition:background .2s}
+.hero-link:hover{background:rgba(255,255,255,0.2)}
+
+/* STATS */
+.stats-bar{max-width:1100px;margin:-24px auto 0;padding:0 5vw;position:relative;z-index:10}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 4px 16px rgba(0,0,0,0.06);text-align:center}
+.stat-num{font-family:'Sora',sans-serif;font-size:1.6rem;font-weight:800;color:var(--blue);line-height:1}
+.stat-label{font-size:0.75rem;color:var(--muted);margin-top:4px}
+
+/* FILTERS */
+.filters-section{max-width:1100px;margin:40px auto 0;padding:0 5vw}
+.filters-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
+.filters-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.filter-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:150px}
+.filter-group label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+select,input[type=text]{padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.88rem;background:#fff;color:var(--ink);outline:none;transition:border-color .2s;width:100%}
+select:focus,input[type=text]:focus{border-color:var(--blue)}
+.filter-btn{background:var(--blue);color:#fff;padding:10px 22px;border:none;border-radius:8px;font-weight:600;font-size:0.88rem;cursor:pointer;font-family:inherit;height:42px;white-space:nowrap;transition:opacity .2s}
+.filter-btn:hover{opacity:0.88}
+.reset-btn{background:transparent;color:var(--muted);padding:10px 16px;border:1px solid var(--border);border-radius:8px;font-weight:500;font-size:0.88rem;cursor:pointer;font-family:inherit;height:42px;transition:all .2s}
+.reset-btn:hover{border-color:var(--ink);color:var(--ink)}
+
+/* TABS */
+.tabs-section{max-width:1100px;margin:24px auto 0;padding:0 5vw}
+.tabs-row{display:flex;gap:8px;flex-wrap:wrap}
+.tab{padding:9px 18px;border-radius:99px;border:1px solid var(--border);background:var(--card);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .2s}
+.tab:hover{border-color:var(--blue);color:var(--blue)}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* RESULTS */
+.results-section{max-width:1100px;margin:24px auto;padding:0 5vw 60px}
+.results-count{font-size:0.85rem;color:var(--muted);margin-bottom:16px}
+.results-count strong{color:var(--ink)}
+
+/* BILL CARD */
+.bill-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;transition:box-shadow .2s}
+.bill-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.08)}
+.bill-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.bill-title-group{flex:1}
+.bill-number{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--blue);margin-bottom:4px}
+.bill-title{font-family:'Sora',sans-serif;font-weight:700;font-size:1rem;line-height:1.3;color:var(--ink);margin-bottom:8px}
+.bill-tags{display:flex;gap:8px;flex-wrap:wrap}
+.bill-tag{font-size:0.72rem;font-weight:600;padding:3px 10px;border-radius:99px}
+.tag-sector{background:#e0e7ff;color:#3730a3}
+.tag-category{background:var(--green-light);color:var(--green)}
+.tag-stage{background:var(--gold-light);color:var(--gold)}
+.bill-badges{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}
+
+/* STATUS BADGES */
+.status-badge{display:inline-block;padding:4px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;white-space:nowrap}
+.s-assented{background:#dcfce7;color:#166534}
+.s-passed{background:#dbeafe;color:#1e40af}
+.s-reading{background:#fef9c3;color:#854d0e}
+.s-committee{background:#f3e8ff;color:#6b21a8}
+.s-withdrawn{background:#fee2e2;color:#991b1b}
+.s-default{background:#f3f4f6;color:#374151}
+
+.bill-body{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px}
+.bill-section-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+.bill-text{font-size:0.85rem;color:var(--ink);line-height:1.6}
+.bill-impact{background:var(--gold-light);border-left:3px solid var(--gold);padding:12px 16px;border-radius:0 8px 8px 0}
+.bill-impact .bill-section-label{color:var(--gold)}
+.bill-footer{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.bill-date{font-size:0.78rem;color:var(--muted)}
+.bill-actions{display:flex;gap:10px}
+.bill-action-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:0.8rem;font-weight:600;text-decoration:none;transition:opacity .2s}
+.btn-official{background:var(--blue);color:#fff}
+.btn-official:hover{opacity:0.85}
+.btn-share{background:var(--paper);color:var(--ink);border:1px solid var(--border)}
+.btn-share:hover{border-color:var(--ink)}
+
+/* EMPTY/LOADING */
+.empty-state{padding:60px 24px;text-align:center;color:var(--muted)}
+.empty-icon{font-size:3rem;margin-bottom:16px}
+.empty-state h3{font-family:'Sora',sans-serif;font-size:1.1rem;color:var(--ink);margin-bottom:8px}
+.loading-grid{display:flex;flex-direction:column;gap:16px}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius);height:180px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* DISCLAIMER */
+.disclaimer{background:var(--gold-light);border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:24px;font-size:0.82rem;color:#92400e;display:flex;gap:10px;align-items:flex-start}
+
+footer{background:var(--ink);color:#9ca3af;padding:32px 5vw;margin-top:20px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:'Sora',sans-serif;font-weight:800;color:#fff;font-size:1rem}
+.footer-links a{font-size:0.82rem;color:#9ca3af;text-decoration:none;margin-left:20px;transition:color .2s}
+.footer-links a:hover{color:#fff}
+
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}.bill-body{grid-template-columns:1fr}.filters-row{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">💡 Angazake <span>PILOT</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="search.html">🔍 Search</a></li>
+      <li><a href="bills.html" class="active">Parliament</a></li>
+      <li><a href="report.html">📸 Report</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <a class="nav-back" href="index.html">← Home</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-tag">Governance Intelligence · Kenya Parliament</div>
+    <h1>🏛️ Parliament & Laws</h1>
+    <p>Bills tabled in the National Assembly and Senate, assented laws with plain-language summaries, and their impact on Masinga citizens — updated regularly by the Angazake team.</p>
+    <div class="hero-links">
+      <a href="https://www.parliament.go.ke" target="_blank" class="hero-link">🏛️ Kenya Parliament</a>
+      <a href="https://www.kenyalaw.org" target="_blank" class="hero-link">⚖️ Kenya Law</a>
+      <a href="https://www.president.go.ke" target="_blank" class="hero-link">📜 Presidential Assent</a>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="statTotal">—</div><div class="stat-label">Total tracked</div></div>
+    <div class="stat-card"><div class="stat-num" id="statAssented">—</div><div class="stat-label">Assented laws</div></div>
+    <div class="stat-card"><div class="stat-num" id="statPassed">—</div><div class="stat-label">Passed — awaiting assent</div></div>
+    <div class="stat-card"><div class="stat-num" id="statReading">—</div><div class="stat-label">In reading/committee</div></div>
+    <div class="stat-card"><div class="stat-num" id="statSectors">—</div><div class="stat-label">Sectors covered</div></div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-section">
+  <div class="filters-box" style="margin-top:16px">
+    <div class="filters-row">
+      <div class="filter-group" style="flex:2;min-width:200px">
+        <label>Search bills</label>
+        <input type="text" id="searchInput" placeholder="Bill name, number or keyword…"/>
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="statusFilter">
+          <option value="">All Statuses</option>
+          <option value="Assented">✅ Assented — Now Law</option>
+          <option value="Passed">📋 Passed Parliament</option>
+          <option value="Second Reading">📖 Second Reading</option>
+          <option value="Committee">🔍 Committee Stage</option>
+          <option value="First Reading">📄 First Reading</option>
+          <option value="Withdrawn">❌ Withdrawn</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Sector</label>
+        <select id="sectorFilter">
+          <option value="">All Sectors</option>
+          <option value="Education">Education</option>
+          <option value="Health">Health</option>
+          <option value="Finance">Finance & Tax</option>
+          <option value="Agriculture">Agriculture</option>
+          <option value="Security">Security</option>
+          <option value="Environment">Environment</option>
+          <option value="Devolution">Devolution</option>
+          <option value="Labour">Labour & Employment</option>
+          <option value="Infrastructure">Infrastructure</option>
+          <option value="Social">Social Protection</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Category</label>
+        <select id="categoryFilter">
+          <option value="">All Categories</option>
+          <option value="Government">Government Bill</option>
+          <option value="Private Member">Private Member Bill</option>
+          <option value="Constitutional">Constitutional Amendment</option>
+          <option value="County">County Legislation</option>
+        </select>
+      </div>
+      <button class="filter-btn" onclick="applyFilters()">Search</button>
+      <button class="reset-btn" onclick="resetFilters()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-section">
+  <div class="tabs-row">
+    <div class="tab active" id="tab-all" onclick="filterTab('all')">📋 All Bills & Laws</div>
+    <div class="tab" id="tab-assented" onclick="filterTab('Assented')">✅ Now Law</div>
+    <div class="tab" id="tab-active" onclick="filterTab('active')">🔄 Active in Parliament</div>
+    <div class="tab" id="tab-education" onclick="filterTab('Education')">🎓 Education</div>
+    <div class="tab" id="tab-health" onclick="filterTab('Health')">🏥 Health</div>
+    <div class="tab" id="tab-finance" onclick="filterTab('Finance')">💰 Finance</div>
+    <div class="tab" id="tab-devolution" onclick="filterTab('Devolution')">🏛️ Devolution</div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results-section" style="margin-top:24px">
+  <div class="disclaimer">
+    <span>⚠️</span>
+    <span>Summaries on this page are written in plain language by the Angazake team for citizen education. Always refer to the official Kenya Law website for the authoritative legal text.</span>
+  </div>
+  <div class="results-count" id="resultsCount">Loading bills and laws…</div>
+  <div id="loadingSkeletons" class="loading-grid">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+  <div id="billsList"></div>
+  <div class="empty-state" id="emptyState" style="display:none">
+    <div class="empty-icon">🏛️</div>
+    <h3>No bills found</h3>
+    <p>Try adjusting your filters. Bills and laws are added regularly by the Angazake team.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">💡 Angazake</div>
+    <div style="font-size:0.82rem">Parliament & Laws · Governance Intelligence</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="projects.html">Projects</a>
+      <a href="search.html">Search</a>
+      <a href="about.html">About</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL='https://awbozblyodzinzfhybtg.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3Ym96Ymx5b2R6aW56Zmh5YnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNTg3NzIsImV4cCI6MjA5MzkzNDc3Mn0.l6Gm9RSRbBMirGvff1hU2xgTxY6f0oEHPbSaBN6ORxs';
+const{createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let allBills=[];
+let activeTab='all';
+
+function statusBadge(s){
+  if(!s)return'<span class="status-badge s-default">Unknown</span>';
+  const l=s.toLowerCase();
+  const cl=l.includes('assent')?'s-assented':l.includes('pass')?'s-passed':l.includes('second')||l.includes('third')?'s-reading':l.includes('committee')||l.includes('first')?'s-committee':l.includes('withdraw')?'s-withdrawn':'s-default';
+  return`<span class="status-badge ${cl}">${s}</span>`;
+}
+
+function statusEmoji(s){
+  if(!s)return'📄';
+  const l=s.toLowerCase();
+  return l.includes('assent')?'✅':l.includes('pass')?'📋':l.includes('second')||l.includes('third')?'📖':l.includes('committee')?'🔍':l.includes('first')?'📄':l.includes('withdraw')?'❌':'📄';
+}
+
+async function loadBills(){
+  const{data,error}=await db.from('Bills & Laws').select('*').order('date_tabled',{ascending:false});
+  document.getElementById('loadingSkeletons').style.display='none';
+  if(error||!data){
+    document.getElementById('emptyState').style.display='block';
+    document.getElementById('resultsCount').textContent='Could not load bills data.';
+    return;
+  }
+  allBills=data;
+  updateStats(data);
+  renderBills(data);
+}
+
+function updateStats(data){
+  const assented=data.filter(b=>b.status?.toLowerCase().includes('assent')).length;
+  const passed=data.filter(b=>b.status?.toLowerCase().includes('pass')&&!b.status?.toLowerCase().includes('assent')).length;
+  const reading=data.filter(b=>b.status?.toLowerCase().includes('reading')||b.status?.toLowerCase().includes('committee')).length;
+  const sectors=new Set(data.map(b=>b.sector).filter(Boolean)).size;
+  document.getElementById('statTotal').textContent=data.length;
+  document.getElementById('statAssented').textContent=assented;
+  document.getElementById('statPassed').textContent=passed;
+  document.getElementById('statReading').textContent=reading;
+  document.getElementById('statSectors').textContent=sectors;
+}
+
+function renderBills(data){
+  const list=document.getElementById('billsList');
+  const empty=document.getElementById('emptyState');
+  document.getElementById('resultsCount').innerHTML=`Showing <strong>${data.length}</strong> of <strong>${allBills.length}</strong> bills and laws`;
+  if(!data.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=data.map(b=>`
+    <div class="bill-card">
+      <div class="bill-header">
+        <div class="bill-title-group">
+          <div class="bill-number">${b.bill_number||'Bill'} · ${b.date_tabled||'Date TBC'}</div>
+          <div class="bill-title">${statusEmoji(b.status)} ${b.title||'Untitled Bill'}</div>
+          <div class="bill-tags">
+            ${b.sector?`<span class="bill-tag tag-sector">📂 ${b.sector}</span>`:''}
+            ${b.category?`<span class="bill-tag tag-category">${b.category}</span>`:''}
+            ${b.stage?`<span class="bill-tag tag-stage">📍 ${b.stage}</span>`:''}
+          </div>
+        </div>
+        <div class="bill-badges">
+          ${statusBadge(b.status)}
+        </div>
+      </div>
+      <div class="bill-body">
+        <div>
+          <div class="bill-section-label">Plain Language Summary</div>
+          <div class="bill-text">${b.summary||'Summary not yet available. Check back soon.'}</div>
+        </div>
+        <div class="bill-impact">
+          <div class="bill-section-label">⚡ Impact on Citizens</div>
+          <div class="bill-text">${b.impact||'Impact analysis not yet available.'}</div>
+        </div>
+      </div>
+      <div class="bill-footer">
+        <div class="bill-date">📅 Tabled: ${b.date_tabled||'—'}</div>
+        <div class="bill-actions">
+          ${b.official_url?`<a href="${b.official_url}" target="_blank" class="bill-action-btn btn-official">📄 Official Text</a>`:''}
+          <a href="https://www.kenyalaw.org" target="_blank" class="bill-action-btn btn-share">⚖️ Kenya Law</a>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function applyFilters(){
+  const search=document.getElementById('searchInput').value.trim().toLowerCase();
+  const status=document.getElementById('statusFilter').value.toLowerCase();
+  const sector=document.getElementById('sectorFilter').value.toLowerCase();
+  const category=document.getElementById('categoryFilter').value.toLowerCase();
+  const filtered=allBills.filter(b=>{
+    const ms=!search||(b.title||'').toLowerCase().includes(search)||(b.bill_number||'').toLowerCase().includes(search)||(b.summary||'').toLowerCase().includes(search);
+    const mst=!status||(b.status||'').toLowerCase().includes(status);
+    const mse=!sector||(b.sector||'').toLowerCase().includes(sector);
+    const mc=!category||(b.category||'').toLowerCase().includes(category);
+    return ms&&mst&&mse&&mc;
+  });
+  renderBills(filtered);
+}
+
+function resetFilters(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('statusFilter').value='';
+  document.getElementById('sectorFilter').value='';
+  document.getElementById('categoryFilter').value='';
+  activeTab='all';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-all').classList.add('active');
+  renderBills(allBills);
+}
+
+function filterTab(tab){
+  activeTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const tabEl=document.getElementById(`tab-${tab}`);
+  if(tabEl)tabEl.classList.add('active');
+  let filtered=allBills;
+  if(tab==='assented') filtered=allBills.filter(b=>b.status?.toLowerCase().includes('assent'));
+  else if(tab==='active') filtered=allBills.filter(b=>!b.status?.toLowerCase().includes('assent')&&!b.status?.toLowerCase().includes('withdraw'));
+  else if(tab!=='all') filtered=allBills.filter(b=>(b.sector||'').toLowerCase().includes(tab.toLowerCase()));
+  renderBills(filtered);
+}
+
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')applyFilters();});
+document.addEventListener('DOMContentLoaded',loadBills);
+</script>
+</body>
+</html>
