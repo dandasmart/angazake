@@ -179,7 +179,6 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
     <ul class="nav-links">
       <li><a href="#how">How it works</a></li>
       <li><a href="projects.html">Projects</a></li>
-      <li><a href="roads.html">Roads</a></li>
       <li><a href="#trackers">Trackers</a></li>
       <li><a href="#wards">Wards</a></li>
       <li><a href="#bursary">Bursary</a></li>
@@ -403,27 +402,27 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── TRACKER CONFIG ──────────────────────────────────────────────────────────
 const TRACKERS = [
-  { emoji:'💰', name:'CDF Kitty',         table:'projects',          filter:{source:'CDF'} },
-  { emoji:'🏥', name:'Health Facilities',  table:'health_facilities', filter:null },
-  { emoji:'🛣️', name:'Roads',             table:'Roads',             filter:null },
-  { emoji:'📚', name:'Bursaries',         table:'bursaries',         filter:null },
-  { emoji:'🎓', name:'Sponsored Students', table:'bursaries',        filter:{status:'disbursed'} },
-  { emoji:'🏫', name:'Schools & TVETs',    table:'schools',           filter:null },
-  { emoji:'💧', name:'Water Projects',     table:'water_projects',    filter:null },
-  { emoji:'🏪', name:'Markets',           table:'markets',           filter:null },
-  { emoji:'👥', name:'Chamas & SACCOs',   table:'chamas_saccos',     filter:null },
-  { emoji:'👷', name:'Staff & Workers',   table:'staff',             filter:null },
-  { emoji:'⚡', name:'Electrification',   table:'electrification',   filter:null },
-  { emoji:'🔒', name:'Security Projects', table:'security_projects', filter:null },
-  { emoji:'⚽', name:'Sports & Football', table:'sports_clubs',      filter:null },
-  { emoji:'🌱', name:'Climate & Env.',    table:'climate_projects',  filter:null },
-  { emoji:'🤝', name:'Donations',         table:'donations',         filter:null },
-  { emoji:'🏘️', name:'MCA Projects',     table:'mca_projects',      filter:null },
-  { emoji:'🏛️', name:'National Govt',    table:'national_projects', filter:null },
-  { emoji:'📋', name:'Contracts & Audits',table:'contracts',         filter:null },
-  { emoji:'🤝', name:'Promises Tracker',  table:'promises',          filter:null },
-  { emoji:'🗺️', name:'Projects Master',  table:'projects',          filter:null },
-  { emoji:'📊', name:'Funding Breakdown', table:'county_projects',   filter:null },
+  { emoji:'💰', name:'CDF Projects',       table:'projects',          filter:null,           link:'projects.html' },
+  { emoji:'🏥', name:'Health Facilities',  table:'health_facilities', filter:null,           link:'#' },
+  { emoji:'🛣️', name:'Roads',             table:'Roads',             filter:null,           link:'roads.html' },
+  { emoji:'📚', name:'Bursaries',         table:'bursaries',         filter:null,           link:'#bursary' },
+  { emoji:'🎓', name:'Sponsored Students', table:'bursaries',        filter:{status:'disbursed'}, link:'#bursary' },
+  { emoji:'🏫', name:'Schools & TVETs',    table:'schools',           filter:null,           link:'#' },
+  { emoji:'💧', name:'Water Projects',     table:'water_projects',    filter:null,           link:'#' },
+  { emoji:'🏪', name:'Markets',           table:'markets',           filter:null,           link:'#' },
+  { emoji:'👥', name:'Chamas & SACCOs',   table:'chamas_saccos',     filter:null,           link:'#' },
+  { emoji:'👷', name:'Staff & Workers',   table:'staff',             filter:null,           link:'#' },
+  { emoji:'⚡', name:'Electrification',   table:'electrification',   filter:null,           link:'#' },
+  { emoji:'🔒', name:'Security Projects', table:'security_projects', filter:null,           link:'#' },
+  { emoji:'⚽', name:'Sports & Clubs',    table:'sports_clubs',      filter:null,           link:'#' },
+  { emoji:'🌱', name:'Climate & Env.',    table:'climate_projects',  filter:null,           link:'#' },
+  { emoji:'🤝', name:'Donations',         table:'donations',         filter:null,           link:'#' },
+  { emoji:'🏘️', name:'MCA Projects',     table:'mca_projects',      filter:null,           link:'#' },
+  { emoji:'🏛️', name:'National Govt',    table:'national_projects', filter:null,           link:'#' },
+  { emoji:'📋', name:'Contracts & Audits',table:'contracts',         filter:null,           link:'#' },
+  { emoji:'🤝', name:'Promises Tracker',  table:'promises',          filter:null,           link:'#' },
+  { emoji:'🗺️', name:'County Projects',  table:'county_projects',   filter:null,           link:'#' },
+  { emoji:'📊', name:'Citizen Reports',   table:'citizen_reports',   filter:null,           link:'#' },
 ];
 
 // ── DB STATUS INDICATOR ─────────────────────────────────────────────────────
@@ -439,12 +438,16 @@ function renderTrackerGrid(counts = {}) {
   const grid = document.getElementById('trackersGrid');
   grid.innerHTML = TRACKERS.map((t, i) => {
     const count = counts[i] !== undefined ? counts[i] : '—';
+    const isLink = t.link && t.link !== '#';
+    const tag = isLink ? `a href="${t.link}"` : 'div';
+    const closeTag = isLink ? 'a' : 'div';
     return `
-      <div class="tracker-card">
+      <${tag} class="tracker-card" style="${isLink ? 'text-decoration:none;cursor:pointer' : ''}">
         <div class="tracker-emoji">${t.emoji}</div>
         <div class="tracker-count" id="tc${i}">${count}</div>
         <div class="tracker-name">${t.name}</div>
-      </div>`;
+        ${isLink ? '<div style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:2px">View →</div>' : ''}
+      </${closeTag}>`;
   }).join('');
 }
 
