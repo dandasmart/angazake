@@ -437,8 +437,11 @@ async function submitReport(){
     description: document.getElementById('description').value.trim(),
     location: document.getElementById('location').value.trim(),
     gps_lat: document.getElementById('gps_lat').value || null,
-    gps_ing: document.getElementById('gps_lng').value || null,
+    gps_lng: document.getElementById('gps_lng').value || null,
     photo_Url: photoBase64 || null,
+    status: 'Pending',
+    reference_number: ref,
+    date_reported: new Date().toISOString(),
   };
 
   try{
