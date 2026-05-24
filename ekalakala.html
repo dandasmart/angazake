@@ -71,6 +71,22 @@ footer{background:var(--ink);color:#9ca3af;padding:32px 5vw}
 .footer-links a{font-size:0.82rem;color:#9ca3af;text-decoration:none;margin-left:20px;transition:color .2s}
 .footer-links a:hover{color:#fff}
 @media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.ward-hero-inner{grid-template-columns:1fr}.mca-card{display:none}.ward-selector{display:none}}
+
+/* HAMBURGER MENU */
+.hamburger{display:none;flex-direction:column;gap:5px;background:transparent;border:none;cursor:pointer;padding:4px;z-index:200}
+.hamburger span{display:block;width:24px;height:2px;background:var(--ink);border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.mobile-menu{display:none;flex-direction:column;background:#fff;border-top:1px solid var(--border);padding:16px 5vw 24px;gap:2px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:12px 16px;font-size:0.95rem;color:var(--ink);text-decoration:none;border-radius:8px;font-weight:500;transition:background .15s}
+.mobile-menu a:hover{background:var(--paper)}
+.mobile-menu-wards{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--border);margin-top:8px;padding-top:8px}
+.mobile-menu-wards a{padding:10px 16px;font-size:0.88rem;color:var(--muted);text-decoration:none;border-radius:8px}
+.mobile-menu-wards a:hover{background:var(--paper);color:var(--ink)}
+@media(max-width:900px){.hamburger{display:flex}.nav-back{display:none}}
+@media(max-width:768px){.nav-links{display:none}}
 </style>
 </head>
 <body>
@@ -85,7 +101,28 @@ footer{background:var(--ink);color:#9ca3af;padding:32px 5vw}
       <a href="ekalakala.html" class="active">Ekalakala</a>
       <a href="muthesya.html" >Muthesya</a>
     </div>
-    <a class="nav-back" href="index.html">← Home</a>
+    <a class="nav-back" href="index.html">← Home</a>      <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+  </div>
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html" onclick="toggleMobileMenu()">&#127968; Home</a>
+    <a href="projects.html" onclick="toggleMobileMenu()">&#127959;&#65039; Projects</a>
+    <a href="roads.html" onclick="toggleMobileMenu()">&#128739;&#65039; Roads</a>
+    <a href="bills.html" onclick="toggleMobileMenu()">&#127963;&#65039; Parliament &amp; Bills</a>
+    <a href="search.html" onclick="toggleMobileMenu()">&#128269; Global Search</a>
+    <a href="index.html#bursary" onclick="toggleMobileMenu()">&#128218; Bursary Register</a>
+    <a href="report.html" onclick="toggleMobileMenu()">&#128248; Report a Project</a>
+    <a href="about.html" onclick="toggleMobileMenu()">&#8505;&#65039; About Angazake</a>
+    <div class="mobile-menu-wards">
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;padding:8px 0 4px">Ward Dashboards</div>
+      <a href="kivaa.html" onclick="toggleMobileMenu()">&#128205; Kivaa Ward</a>
+      <a href="masinga-central.html" onclick="toggleMobileMenu()">&#128205; Masinga Central</a>
+      <a href="ndithini.html" onclick="toggleMobileMenu()">&#128205; Ndithini Ward</a>
+      <a href="ekalakala.html" onclick="toggleMobileMenu()">&#128205; Ekalakala Ward</a>
+      <a href="muthesya.html" onclick="toggleMobileMenu()">&#128205; Muthesya Ward</a>
+    </div>
   </div>
 </nav>
 
