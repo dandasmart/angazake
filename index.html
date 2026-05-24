@@ -196,6 +196,7 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
       <li><a href="roads.html">🛣️ Roads</a></li>
       <li><a href="bills.html">🏛️ Parliament</a></li>
       <li><a href="search.html">🔍 Search</a></li>
+      <li><a href="whatsapp.html">💬 WhatsApp</a></li>
       <li><a href="#wards">Wards</a></li>
       <li><a href="#bursary">Bursary</a></li>
       <li><a href="report.html">📸 Report</a></li>
@@ -238,7 +239,9 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
   <p class="hero-sub">Kenya's first sub-county accountability platform. Track every CDF project, bursary, road and promise in real time — on WhatsApp, website and app.</p>
   <div class="hero-actions">
     <a href="#bursary" class="btn-primary">📚 Check Bursary Status</a>
-    <a href="#trackers" class="btn-secondary">↓ View All Trackers</a>
+    <a href="search.html" class="btn-secondary">🔍 Search All Records</a>
+    <a href="report.html" class="btn-secondary">📸 Report a Project</a>
+    <a href="whatsapp.html" class="btn-secondary">💬 Try on WhatsApp</a>
   </div>
   <div class="stats-bar">
     <div class="stat"><div class="stat-num">~65K</div><div class="stat-label">Registered voters</div></div>
@@ -393,14 +396,20 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
     <div class="wa-box">
       <div>
         <div class="wa-number">+254 700 000 000</div>
-        <p style="color:#9ca3af;font-size:0.85rem;margin-top:6px">No download. No sign-up. Works on any phone.</p>
+        <p style="color:#9ca3af;font-size:0.85rem;margin-top:6px">No download. No sign-up. Works on any phone. Bot launching on registration.</p>
         <div class="wa-commands">
           <span class="wa-cmd">HABARI → Main menu</span>
           <span class="wa-cmd">BURSARY → Student lookup</span>
+          <span class="wa-cmd">PROJECTS → Find projects</span>
           <span class="wa-cmd">REPORT → Flag a project</span>
+          <span class="wa-cmd">WARD → Ward dashboard</span>
         </div>
       </div>
-      <a href="https://wa.me/254700000000?text=HABARI" target="_blank" class="wa-cta">💬 Open WhatsApp</a>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">
+        <a href="https://wa.me/254700000000?text=HABARI" target="_blank" class="wa-cta">💬 Open WhatsApp</a>
+      <a href="whatsapp.html" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:14px 24px;border-radius:10px;font-weight:600;font-size:0.92rem;text-decoration:none;transition:background .2s">📖 See All Commands</a>
+        <a href="whatsapp.html" style="color:#9dd5b6;font-size:0.82rem;text-align:center">See all commands →</a>
+      </div>
     </div>
   </div>
 </section>
