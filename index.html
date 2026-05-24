@@ -177,15 +177,14 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
   <div class="nav-inner">
     <a class="nav-brand" href="#">💡 Angazake <span>PILOT</span></a>
     <ul class="nav-links">
-      <li><a href="#how">How it works</a></li>
-      <li><a href="projects.html">Projects</a></li>
-      <li><a href="roads.html">Roads</a></li>
+      <li><a href="projects.html">🏗️ Projects</a></li>
+      <li><a href="roads.html">🛣️ Roads</a></li>
+      <li><a href="bills.html">🏛️ Parliament</a></li>
       <li><a href="search.html">🔍 Search</a></li>
       <li><a href="#wards">Wards</a></li>
       <li><a href="#bursary">Bursary</a></li>
       <li><a href="report.html">📸 Report</a></li>
       <li><a href="about.html">About</a></li>
-      <li><a href="bills.html">🏛️ Parliament</a></li>
     </ul>
     <div style="display:flex;align-items:center;gap:10px">
       <div id="dbStatus" class="db-status connecting"><div class="db-dot"></div> <span>Connecting…</span></div>
@@ -377,22 +376,34 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
     </div>
     <div class="footer-col">
       <h4>Platform</h4>
-      <a href="#trackers">All trackers</a>
-      <a href="#bursary">Bursary register</a>
-      <a href="#wards">Ward dashboards</a>
-      <a href="#">Download app</a>
+      <a href="projects.html">Projects Tracker</a>
+      <a href="roads.html">Roads Tracker</a>
+      <a href="bills.html">Parliament & Bills</a>
+      <a href="search.html">Global Search</a>
+      <a href="report.html">Report a Project</a>
     </div>
     <div class="footer-col">
-      <h4>Contact</h4>
-      <a href="#whatsapp">WhatsApp us</a>
-      <a href="#">Email the team</a>
-      <a href="#">Report an issue</a>
-      <a href="#">Partner with us</a>
+      <h4>Wards</h4>
+      <a href="kivaa.html">Kivaa Ward</a>
+      <a href="masinga-central.html">Masinga Central</a>
+      <a href="ndithini.html">Ndithini Ward</a>
+      <a href="ekalakala.html">Ekalakala Ward</a>
+      <a href="muthesya.html">Muthesya Ward</a>
+    </div>
+    <div class="footer-col">
+      <h4>About</h4>
+      <a href="about.html">About Angazake</a>
+      <a href="about.html#contact">Contact Us</a>
+      <a href="about.html">Partner with us</a>
+      <a href="#bursary">Bursary Register</a>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 Angazake — Kenya's Sub-County Accountability Platform</span>
-    <span>#Angazake · #Wazi2027</span>
+    <span>© 2026 Angazake — Kenya's Sub-County Accountability Platform · Wazi. Sasa. Kwa Wote.</span>
+    <span style="display:flex;gap:16px;align-items:center">
+      <span>#Angazake · #Wazi2027</span>
+      <a href="admin.html" style="color:#374151;font-size:0.7rem;text-decoration:none">⚙</a>
+    </span>
   </div>
 </footer>
 
@@ -405,27 +416,27 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── TRACKER CONFIG ──────────────────────────────────────────────────────────
 const TRACKERS = [
-  { emoji:'💰', name:'CDF Projects',       table:'projects',          filter:null,           link:'projects.html' },
-  { emoji:'🏥', name:'Health Facilities',  table:'health_facilities', filter:null,           link:'#' },
-  { emoji:'🛣️', name:'Roads',             table:'Roads',             filter:null,           link:'roads.html' },
-  { emoji:'📚', name:'Bursaries',         table:'bursaries',         filter:null,           link:'#bursary' },
-  { emoji:'🎓', name:'Sponsored Students', table:'bursaries',        filter:{status:'disbursed'}, link:'#bursary' },
-  { emoji:'🏫', name:'Schools & TVETs',    table:'schools',           filter:null,           link:'#' },
-  { emoji:'💧', name:'Water Projects',     table:'water_projects',    filter:null,           link:'#' },
-  { emoji:'🏪', name:'Markets',           table:'markets',           filter:null,           link:'#' },
-  { emoji:'👥', name:'Chamas & SACCOs',   table:'chamas_saccos',     filter:null,           link:'#' },
-  { emoji:'👷', name:'Staff & Workers',   table:'staff',             filter:null,           link:'#' },
-  { emoji:'⚡', name:'Electrification',   table:'electrification',   filter:null,           link:'#' },
-  { emoji:'🔒', name:'Security Projects', table:'security_projects', filter:null,           link:'#' },
-  { emoji:'⚽', name:'Sports & Clubs',    table:'sports_clubs',      filter:null,           link:'#' },
-  { emoji:'🌱', name:'Climate & Env.',    table:'climate_projects',  filter:null,           link:'#' },
-  { emoji:'🤝', name:'Donations',         table:'donations',         filter:null,           link:'#' },
-  { emoji:'🏘️', name:'MCA Projects',     table:'mca_projects',      filter:null,           link:'#' },
-  { emoji:'🏛️', name:'National Govt',    table:'national_projects', filter:null,           link:'#' },
-  { emoji:'📋', name:'Contracts & Audits',table:'contracts',         filter:null,           link:'#' },
-  { emoji:'🤝', name:'Promises Tracker',  table:'promises',          filter:null,           link:'#' },
-  { emoji:'🗺️', name:'County Projects',  table:'county_projects',   filter:null,           link:'#' },
-  { emoji:'📊', name:'Citizen Reports',   table:'citizen_reports',   filter:null,           link:'#' },
+  { emoji:'💰', name:'CDF Projects',       table:'projects',          filter:null,                    link:'projects.html' },
+  { emoji:'🏥', name:'Health Facilities',  table:'health_facilities', filter:null,                    link:'search.html?q=health' },
+  { emoji:'🛣️', name:'Roads',             table:'Roads',             filter:null,                    link:'roads.html' },
+  { emoji:'📚', name:'Bursaries',         table:'bursaries',         filter:null,                    link:'#bursary' },
+  { emoji:'🎓', name:'Sponsored Students', table:'bursaries',        filter:{status:'disbursed'},     link:'#bursary' },
+  { emoji:'🏫', name:'Schools & TVETs',    table:'schools',           filter:null,                    link:'search.html?q=school' },
+  { emoji:'💧', name:'Water Projects',     table:'water_projects',    filter:null,                    link:'search.html?q=water' },
+  { emoji:'🏪', name:'Markets',           table:'markets',           filter:null,                    link:'search.html?q=market' },
+  { emoji:'👥', name:'Chamas & SACCOs',   table:'chamas_saccos',     filter:null,                    link:'search.html?q=chama' },
+  { emoji:'👷', name:'Staff & Workers',   table:'staff',             filter:null,                    link:'about.html' },
+  { emoji:'⚡', name:'Electrification',   table:'electrification',   filter:null,                    link:'search.html?q=electrification' },
+  { emoji:'🔒', name:'Security Projects', table:'security_projects', filter:null,                    link:'search.html?q=security' },
+  { emoji:'⚽', name:'Sports & Clubs',    table:'sports_clubs',      filter:null,                    link:'search.html?q=sports' },
+  { emoji:'🌱', name:'Climate & Env.',    table:'climate_projects',  filter:null,                    link:'search.html?q=climate' },
+  { emoji:'🤝', name:'Donations',         table:'donations',         filter:null,                    link:'search.html?q=donation' },
+  { emoji:'🏘️', name:'MCA Projects',     table:'mca_projects',      filter:null,                    link:'projects.html' },
+  { emoji:'🏛️', name:'National Govt',    table:'national_projects', filter:null,                    link:'projects.html' },
+  { emoji:'📋', name:'Contracts & Audits',table:'contracts',         filter:null,                    link:'search.html?q=contract' },
+  { emoji:'🤝', name:'Promises Tracker',  table:'promises',          filter:null,                    link:'search.html?q=promise' },
+  { emoji:'🗺️', name:'County Projects',  table:'county_projects',   filter:null,                    link:'projects.html' },
+  { emoji:'📊', name:'Citizen Reports',   table:'citizen_reports',   filter:null,                    link:'report.html' },
 ];
 
 // ── DB STATUS INDICATOR ─────────────────────────────────────────────────────
