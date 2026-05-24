@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin Panel — Angazake</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0d1117;--paper:#f9f7f2;--green:#1a6b3c;--green-light:#e8f4ed;--gold:#c8860a;--red:#c0392b;--blue:#1a4a7a;--muted:#6b7280;--border:#e2ddd6;--card:#ffffff;--radius:12px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:#0d1117;color:#fff;line-height:1.6;min-height:100vh}
+
+/* LOGIN */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0d1117;padding:20px}
+.login-card{background:#1a1f2e;border:1px solid #2d3748;border-radius:16px;padding:40px;width:100%;max-width:380px;text-align:center}
+.login-logo{font-size:2.5rem;margin-bottom:8px}
+.login-title{font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:4px}
+.login-sub{font-size:0.82rem;color:#6b7280;margin-bottom:32px}
+.login-input{width:100%;padding:14px 16px;background:#0d1117;border:1px solid #2d3748;border-radius:10px;color:#fff;font-family:inherit;font-size:1rem;outline:none;text-align:center;letter-spacing:.3em;margin-bottom:16px;transition:border-color .2s}
+.login-input:focus{border-color:var(--green)}
+.login-btn{width:100%;background:var(--green);color:#fff;padding:13px;border:none;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;font-family:inherit;transition:opacity .2s}
+.login-btn:hover{opacity:0.88}
+.login-error{color:#fc8181;font-size:0.82rem;margin-top:8px;display:none}
+
+/* ADMIN LAYOUT */
+.admin-screen{display:none;min-height:100vh;background:#0d1117}
+.admin-nav{background:#111827;border-bottom:1px solid #1f2937;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.admin-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1rem;color:#fff;display:flex;align-items:center;gap:8px}
+.admin-brand span{background:var(--gold);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.72rem}
+.admin-nav-right{display:flex;align-items:center;gap:12px}
+.admin-badge{font-size:0.75rem;color:#9ca3af}
+.logout-btn{background:transparent;border:1px solid #374151;color:#9ca3af;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.8rem;font-family:inherit;transition:all .2s}
+.logout-btn:hover{border-color:#fff;color:#fff}
+
+.admin-body{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 56px)}
+
+/* SIDEBAR */
+.sidebar{background:#111827;border-right:1px solid #1f2937;padding:16px 0;overflow-y:auto;max-height:calc(100vh - 56px);position:sticky;top:56px}
+.sidebar-section{padding:8px 16px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#4b5563;margin-top:8px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;transition:background .15s;border-left:3px solid transparent;font-size:0.84rem;color:#9ca3af}
+.sidebar-item:hover{background:#1f2937;color:#fff}
+.sidebar-item.active{background:#1f2937;color:#fff;border-left-color:var(--green)}
+.sidebar-item-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.sidebar-count{margin-left:auto;background:#1f2937;padding:2px 8px;border-radius:99px;font-size:0.7rem;color:#6b7280}
+.sidebar-item.active .sidebar-count{background:#2d3748;color:#9ca3af}
+
+/* MAIN CONTENT */
+.main-content{padding:24px;overflow-y:auto}
+.content-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.content-title{font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:800;color:#fff}
+.content-subtitle{font-size:0.82rem;color:#6b7280;margin-top:2px}
+.add-btn{background:var(--green);color:#fff;padding:10px 20px;border:none;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:opacity .2s}
+.add-btn:hover{opacity:0.88}
+
+/* FORM */
+.form-panel{background:#111827;border:1px solid #1f2937;border-radius:var(--radius);padding:24px;margin-bottom:24px;display:none}
+.form-panel.open{display:block}
+.form-panel-title{font-family:'Sora',sans-serif;font-weight:700;font-size:0.95rem;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280}
+.form-group label span{color:#fc8181}
+input,select,textarea{padding:10px 13px;background:#0d1117;border:1px solid #2d3748;border-radius:8px;color:#fff;font-family:inherit;font-size:0.87rem;outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+select option{background:#0d1117}
+textarea{resize:vertical;min-height:80px}
+.form-actions{display:flex;gap:10px;margin-top:20px}
+.save-btn{background:var(--green);color:#fff;padding:10px 24px;border:none;border-radius:8px;font-weight:600;font-size:0.88rem;cursor:pointer;font-family:inherit;transition:opacity .2s}
+.save-btn:hover{opacity:0.88}
+.save-btn:disabled{opacity:0.5;cursor:not-allowed}
+.cancel-btn{background:transparent;color:#9ca3af;padding:10px 20px;border:1px solid #374151;border-radius:8px;font-weight:500;font-size:0.88rem;cursor:pointer;font-family:inherit;transition:all .2s}
+.cancel-btn:hover{border-color:#fff;color:#fff}
+
+/* TABLE */
+.data-table-wrap{background:#111827;border:1px solid #1f2937;border-radius:var(--radius);overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;min-width:600px}
+thead{background:#1f2937}
+th{padding:10px 14px;text-align:left;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid #1f2937;color:#d1d5db;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#1a2035}
+.td-actions{display:flex;gap:6px;white-space:nowrap}
+.del-btn{background:#450a0a;color:#fc8181;padding:4px 10px;border:none;border-radius:6px;font-size:0.75rem;cursor:pointer;font-family:inherit;transition:background .2s}
+.del-btn:hover{background:#7f1d1d}
+.edit-btn{background:#1e3a5f;color:#93c5fd;padding:4px 10px;border:none;border-radius:6px;font-size:0.75rem;cursor:pointer;font-family:inherit;transition:background .2s}
+.edit-btn:hover{background:#1e40af}
+.status-pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:600}
+.pill-green{background:#064e3b;color:#6ee7b7}
+.pill-yellow{background:#451a03;color:#fcd34d}
+.pill-red{background:#450a0a;color:#fca5a5}
+.pill-blue{background:#1e3a5f;color:#93c5fd}
+.pill-gray{background:#1f2937;color:#9ca3af}
+
+.empty-table{padding:40px;text-align:center;color:#4b5563;font-size:0.88rem}
+.loading-table{padding:30px;text-align:center;color:#6b7280;font-size:0.85rem}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#064e3b;color:#6ee7b7;padding:12px 20px;border-radius:10px;font-size:0.85rem;font-weight:600;z-index:999;display:none;border:1px solid #065f46;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.toast.error{background:#450a0a;color:#fca5a5;border-color:#7f1d1d}
+
+@media(max-width:768px){.admin-body{grid-template-columns:1fr}.sidebar{display:none}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">💡</div>
+    <div class="login-title">Angazake Admin</div>
+    <div class="login-sub">Enter your admin PIN to continue</div>
+    <input type="password" class="login-input" id="pinInput" placeholder="••••••" maxlength="6" onkeydown="if(event.key==='Enter')checkPin()"/>
+    <button class="login-btn" onclick="checkPin()">Enter Admin Panel</button>
+    <div class="login-error" id="loginError">❌ Incorrect PIN. Try again.</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-screen" id="adminScreen">
+  <div class="admin-nav">
+    <div class="admin-brand">💡 Angazake <span>ADMIN</span></div>
+    <div class="admin-nav-right">
+      <div class="admin-badge" id="adminTime"></div>
+      <a href="index.html" style="color:#9ca3af;font-size:0.8rem;text-decoration:none">← Public Site</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section">Core Trackers</div>
+      <div class="sidebar-item active" onclick="loadTable('projects')" id="nav-projects"><span class="sidebar-item-icon">🏗️</span> CDF Projects <span class="sidebar-count" id="cnt-projects">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('Roads')" id="nav-Roads"><span class="sidebar-item-icon">🛣️</span> Roads <span class="sidebar-count" id="cnt-Roads">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('bursaries')" id="nav-bursaries"><span class="sidebar-item-icon">📚</span> Bursaries <span class="sidebar-count" id="cnt-bursaries">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('health_facilities')" id="nav-health_facilities"><span class="sidebar-item-icon">🏥</span> Health Facilities <span class="sidebar-count" id="cnt-health_facilities">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('schools')" id="nav-schools"><span class="sidebar-item-icon">🏫</span> Schools <span class="sidebar-count" id="cnt-schools">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('water_projects')" id="nav-water_projects"><span class="sidebar-item-icon">💧</span> Water Projects <span class="sidebar-count" id="cnt-water_projects">—</span></div>
+      <div class="sidebar-section">Infrastructure</div>
+      <div class="sidebar-item" onclick="loadTable('electrification')" id="nav-electrification"><span class="sidebar-item-icon">⚡</span> Electrification <span class="sidebar-count" id="cnt-electrification">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('security_projects')" id="nav-security_projects"><span class="sidebar-item-icon">🔒</span> Security <span class="sidebar-count" id="cnt-security_projects">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('markets')" id="nav-markets"><span class="sidebar-item-icon">🏪</span> Markets <span class="sidebar-count" id="cnt-markets">—</span></div>
+      <div class="sidebar-section">Government</div>
+      <div class="sidebar-item" onclick="loadTable('mca_projects')" id="nav-mca_projects"><span class="sidebar-item-icon">🏘️</span> MCA Projects <span class="sidebar-count" id="cnt-mca_projects">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('county_projects')" id="nav-county_projects"><span class="sidebar-item-icon">🏛️</span> County Projects <span class="sidebar-count" id="cnt-county_projects">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('national_projects')" id="nav-national_projects"><span class="sidebar-item-icon">🇰🇪</span> National Projects <span class="sidebar-count" id="cnt-national_projects">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('contracts')" id="nav-contracts"><span class="sidebar-item-icon">📋</span> Contracts <span class="sidebar-count" id="cnt-contracts">—</span></div>
+      <div class="sidebar-section">Community</div>
+      <div class="sidebar-item" onclick="loadTable('chamas_saccos')" id="nav-chamas_saccos"><span class="sidebar-item-icon">👥</span> Chamas & SACCOs <span class="sidebar-count" id="cnt-chamas_saccos">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('sports_clubs')" id="nav-sports_clubs"><span class="sidebar-item-icon">⚽</span> Sports Clubs <span class="sidebar-count" id="cnt-sports_clubs">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('climate_projects')" id="nav-climate_projects"><span class="sidebar-item-icon">🌱</span> Climate Projects <span class="sidebar-count" id="cnt-climate_projects">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('donations')" id="nav-donations"><span class="sidebar-item-icon">🤝</span> Donations <span class="sidebar-count" id="cnt-donations">—</span></div>
+      <div class="sidebar-section">Governance</div>
+      <div class="sidebar-item" onclick="loadTable('promises')" id="nav-promises"><span class="sidebar-item-icon">🤝</span> Promises <span class="sidebar-count" id="cnt-promises">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('Bills & Laws')" id="nav-bills"><span class="sidebar-item-icon">🏛️</span> Bills & Laws <span class="sidebar-count" id="cnt-bills">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('citizen_reports')" id="nav-citizen_reports"><span class="sidebar-item-icon">📸</span> Citizen Reports <span class="sidebar-count" id="cnt-citizen_reports">—</span></div>
+      <div class="sidebar-item" onclick="loadTable('staff')" id="nav-staff"><span class="sidebar-item-icon">👷</span> Staff <span class="sidebar-count" id="cnt-staff">—</span></div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+      <div class="content-header">
+        <div>
+          <div class="content-title" id="contentTitle">🏗️ CDF Projects</div>
+          <div class="content-subtitle" id="contentSubtitle">Add, edit and manage project records</div>
+        </div>
+        <button class="add-btn" onclick="toggleForm()">➕ Add New Record</button>
+      </div>
+
+      <!-- DYNAMIC FORM -->
+      <div class="form-panel" id="formPanel">
+        <div class="form-panel-title">➕ <span id="formTitle">Add New Record</span></div>
+        <div class="form-grid" id="formFields"></div>
+        <div class="form-actions">
+          <button class="save-btn" id="saveBtn" onclick="saveRecord()">Save Record</button>
+          <button class="cancel-btn" onclick="toggleForm()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- DATA TABLE -->
+      <div class="data-table-wrap">
+        <table>
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"><tr><td class="loading-table">Select a table from the sidebar to begin</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL='https://awbozblyodzinzfhybtg.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3Ym96Ymx5b2R6aW56Zmh5YnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNTg3NzIsImV4cCI6MjA5MzkzNDc3Mn0.l6Gm9RSRbBMirGvff1hU2xgTxY6f0oEHPbSaBN6ORxs';
+const{createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
+// ── PIN ──────────────────────────────────────────────────────────────────────
+const ADMIN_PIN='2027';
+function checkPin(){
+  const pin=document.getElementById('pinInput').value;
+  if(pin===ADMIN_PIN){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminScreen').style.display='block';
+    init();
+  } else {
+    document.getElementById('loginError').style.display='block';
+    document.getElementById('pinInput').value='';
+    document.getElementById('pinInput').focus();
+  }
+}
+function logout(){
+  document.getElementById('adminScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('pinInput').value='';
+}
+
+// ── TABLES CONFIG ────────────────────────────────────────────────────────────
+const TABLES = {
+  'projects':{label:'CDF Projects',icon:'🏗️',fields:[
+    {k:'Name',l:'Project Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Type',l:'Type',t:'text'},
+    {k:'Funder',l:'Funder',t:'funder'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'Completion_pct',l:'Completion %',t:'number'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'gps_lat',l:'GPS Latitude',t:'number'},
+    {k:'gps_lng',l:'GPS Longitude',t:'number'},
+    {k:'Photo_Url',l:'Photo URL',t:'url'},
+  ]},
+  'Roads':{label:'Roads',icon:'🛣️',fields:[
+    {k:'Name',l:'Road Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Road_type',l:'Road Type',t:'select',opts:['Tarmac','Gravel','Murram','Earth','Bitumen']},
+    {k:'Funder',l:'Funder',t:'funder'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'km_length',l:'Length (km)',t:'number'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'Audit_Url',l:'Audit URL',t:'url'},
+    {k:'Photo_Url',l:'Photo URL',t:'url'},
+  ]},
+  'bursaries':{label:'Bursaries',icon:'📚',fields:[
+    {k:'student_name',l:'Student Name',t:'text',req:true},
+    {k:'ward',l:'Ward',t:'ward',req:true},
+    {k:'school',l:'School',t:'text',req:true},
+    {k:'admission_no',l:'Admission No.',t:'text'},
+    {k:'amount',l:'Amount (KES)',t:'number'},
+    {k:'term',l:'Term',t:'select',opts:['Term 1','Term 2','Term 3']},
+    {k:'year',l:'Year',t:'number'},
+    {k:'course',l:'Course',t:'text'},
+    {k:'institution_type',l:'Institution Type',t:'select',opts:['Secondary School','TVET','University','College']},
+    {k:'status',l:'Status',t:'select',opts:['Pending','Approved','Disbursed','Rejected']},
+  ]},
+  'health_facilities':{label:'Health Facilities',icon:'🏥',fields:[
+    {k:'Name',l:'Facility Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Type',l:'Type',t:'select',opts:['Dispensary','Health Centre','Hospital','Maternity','Laboratory','Pharmacy']},
+    {k:'Funder',l:'Funder',t:'funder'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'level_before',l:'Level Before',t:'text'},
+    {k:'Level_after',l:'Level After',t:'text'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'completion_pct',l:'Completion %',t:'number'},
+    {k:'photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'schools':{label:'Schools & TVETs',icon:'🏫',fields:[
+    {k:'name',l:'School Name',t:'text',req:true},
+    {k:'ward',l:'Ward',t:'ward',req:true},
+    {k:'type',l:'Type',t:'select',opts:['Primary','Secondary','TVET','University','ECD']},
+    {k:'project_type',l:'Project Type',t:'select',opts:['Classroom','Laboratory','Library','Toilets','IT Hub','Renovation','Equipment','Borehole']},
+    {k:'funder',l:'Funder',t:'funder'},
+    {k:'cost',l:'Cost (KES)',t:'number'},
+    {k:'status',l:'Status',t:'status'},
+    {k:'completion_pct',l:'Completion %',t:'number'},
+    {k:'contractor',l:'Contractor',t:'text'},
+    {k:'photo_Url',l:'Photo URL',t:'url'},
+  ]},
+  'water_projects':{label:'Water Projects',icon:'💧',fields:[
+    {k:'Name',l:'Project Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Type',l:'Type',t:'select',opts:['Borehole','Water Pan','Dam','Pipeline','Rainwater Harvesting','Sand Dam','Water Tower']},
+    {k:'Funder',l:'Funder',t:'funder'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'completion_pct',l:'Completion %',t:'number'},
+    {k:'Households_served',l:'Households Served',t:'number'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'Photo_Url',l:'Photo URL',t:'url'},
+  ]},
+  'electrification':{label:'Electrification',icon:'⚡',fields:[
+    {k:'Name',l:'Project Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Type',l:'Type',t:'select',opts:['REP Line','Solar Installation','Street Light','High Mast','Transformer','Biogas']},
+    {k:'Funder',l:'Funder',t:'funder'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'Homes_connected',l:'Homes Connected',t:'number'},
+    {k:'Completion_pct',l:'Completion %',t:'number'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'Implementing_agency',l:'Implementing Agency',t:'text'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'security_projects':{label:'Security Projects',icon:'🔒',fields:[
+    {k:'Name',l:'Project Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Type',l:'Type',t:'select',opts:['Police Post','Chief Office','CCTV','High Mast Light','Community Policing','Fencing']},
+    {k:'Funder',l:'Funder',t:'funder'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'Completion_pct',l:'Completion %',t:'number'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'markets':{label:'Markets',icon:'🏪',fields:[
+    {k:'Name',l:'Market Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Project_type',l:'Project Type',t:'select',opts:['New Market','Renovation','Stalls','Shade','Ablution Block','Cold Storage','Slaughterhouse']},
+    {k:'Funder',l:'Funder',t:'funder'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'Stalls_count',l:'Stalls Count',t:'number'},
+    {k:'Completion_pct',l:'Completion %',t:'number'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'mca_projects':{label:'MCA Projects',icon:'🏘️',fields:[
+    {k:'Name',l:'Project Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'MCA_name',l:'MCA Name',t:'select',opts:['Hon. Alphonce Mutinda','Hon. Joshua Kiilu Mwonga','Hon. Paul Musila','Hon. Stephen Mwanthi','Hon. Daniel Musyoka Muindi']},
+    {k:'Type',l:'Type',t:'text'},
+    {k:'Funder',l:'Funder',t:'text'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'Completion_pct',l:'Completion %',t:'number'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'Ward_allocation',l:'Ward Allocation (KES)',t:'number'},
+    {k:'Ward_spent',l:'Ward Spent (KES)',t:'number'},
+    {k:'Financial_year',l:'Financial Year',t:'text'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'county_projects':{label:'County Projects',icon:'🏛️',fields:[
+    {k:'Name',l:'Project Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Type',l:'Type',t:'text'},
+    {k:'Department',l:'Department',t:'text'},
+    {k:'Funder',l:'Funder',t:'text'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'Completion_pct',l:'Completion %',t:'number'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'Financial_year',l:'Financial Year',t:'text'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'national_projects':{label:'National Projects',icon:'🇰🇪',fields:[
+    {k:'Name',l:'Project Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Type',l:'Type',t:'text'},
+    {k:'Implementing_agency',l:'Implementing Agency',t:'select',opts:['KeRRA','KURA','MoH','TSC','REA','KPLC','Water Services','NYS','Other']},
+    {k:'Funder',l:'Funder',t:'text'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'Completion_pct',l:'Completion %',t:'number'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'Financial_year',l:'Financial Year',t:'text'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'contracts':{label:'Contracts & Audits',icon:'📋',fields:[
+    {k:'Contract_number',l:'Contract No.',t:'text',req:true},
+    {k:'Project_name',l:'Project Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward'},
+    {k:'Contractor_name',l:'Contractor Name',t:'text'},
+    {k:'Contractor_contact',l:'Contractor Contact',t:'text'},
+    {k:'Award_method',l:'Award Method',t:'select',opts:['Open Tender','Restricted Tender','Direct Procurement','Framework Agreement']},
+    {k:'Contract_value',l:'Contract Value (KES)',t:'number'},
+    {k:'Start_date',l:'Start Date',t:'date'},
+    {k:'End_date',l:'End Date',t:'date'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'Audit_status',l:'Audit Status',t:'select',opts:['Not Audited','Ongoing Audit','Audited — Clean','Audited — Queries','Flagged']},
+    {k:'Audit_url',l:'Audit URL',t:'url'},
+    {k:'Red_flags',l:'Red Flags',t:'textarea'},
+    {k:'Funder',l:'Funder',t:'funder'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'chamas_saccos':{label:'Chamas & SACCOs',icon:'👥',fields:[
+    {k:'Name',l:'Group Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Type',l:'Type',t:'select',opts:['Chama','SACCO','Women Group','Youth Group','Self Help','CBO']},
+    {k:'Member_count',l:'Member Count',t:'number'},
+    {k:'Service_offered',l:'Service Offered',t:'text'},
+    {k:'Amount',l:'Amount (KES)',t:'number'},
+    {k:'Funding_type',l:'Funding Type',t:'select',opts:['CDF Grant','County Grant','National Grant','NGO','Donor','Own Savings']},
+    {k:'Expected_impact',l:'Expected Impact',t:'textarea'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'Contact_person',l:'Contact Person',t:'text'},
+    {k:'Contact_phone',l:'Contact Phone',t:'text'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'sports_clubs':{label:'Sports Clubs',icon:'⚽',fields:[
+    {k:'Club_name',l:'Club Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Sport_type',l:'Sport',t:'select',opts:['Football','Volleyball','Basketball','Athletics','Rugby','Netball','Swimming','Boxing','Other']},
+    {k:'Benefit_type',l:'Benefit Type',t:'select',opts:['Cash Award','Equipment','Uniform','Training','Facility','Transport']},
+    {k:'Reason_for_award',l:'Reason for Award',t:'textarea'},
+    {k:'Amount',l:'Amount (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'select',opts:['Awarded','Pending','Paid']},
+    {k:'Contact_person',l:'Contact Person',t:'text'},
+    {k:'Contact_phone',l:'Contact Phone',t:'text'},
+    {k:'Date_awarded',l:'Date Awarded',t:'date'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'climate_projects':{label:'Climate Projects',icon:'🌱',fields:[
+    {k:'Name',l:'Project Name',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward',req:true},
+    {k:'Type',l:'Type',t:'select',opts:['Tree Planting','Soil Conservation','Terracing','Sand Dam','Water Catchment','Solar Energy','Biogas','Agroforestry','Wetland Restoration','Clean Cooking','Waste Management','Climate-Smart Agriculture','Flood Control','Other']},
+    {k:'Funder',l:'Funder',t:'funder'},
+    {k:'Cost',l:'Cost (KES)',t:'number'},
+    {k:'Status',l:'Status',t:'status'},
+    {k:'Trees_planted',l:'Trees Planted',t:'number'},
+    {k:'Acres_covered',l:'Acres Covered',t:'number'},
+    {k:'Completion_pct',l:'Completion %',t:'number'},
+    {k:'Contractor',l:'Contractor',t:'text'},
+    {k:'Impact_metric',l:'Impact Metric',t:'text'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'donations':{label:'Donations',icon:'🤝',fields:[
+    {k:'Donor_name',l:'Donor Name',t:'text',req:true},
+    {k:'Donor_type',l:'Donor Type',t:'select',opts:['Individual','NGO','Corporate','Government','Church','Diaspora','Other']},
+    {k:'Ward',l:'Ward',t:'ward'},
+    {k:'Amount',l:'Amount (KES)',t:'number'},
+    {k:'Project_covered',l:'Project Covered',t:'text'},
+    {k:'Date_received',l:'Date Received',t:'date'},
+    {k:'Status',l:'Status',t:'select',opts:['Received','Pending','Utilised','Partially Utilised']},
+    {k:'Verification_url',l:'Verification URL',t:'url'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'promises':{label:'Promises Tracker',icon:'🤝',fields:[
+    {k:'Promise',l:'Promise / Commitment',t:'textarea',req:true},
+    {k:'Made_by',l:'Made By',t:'text',req:true},
+    {k:'Ward',l:'Ward',t:'ward'},
+    {k:'Category',l:'Category',t:'select',opts:['Infrastructure','Education','Health','Water','Security','Employment','Social','Other']},
+    {k:'Status',l:'Status',t:'select',opts:['Delivered','Partially Delivered','Not Delivered','Ongoing','Abandoned']},
+    {k:'Date_made',l:'Date Made',t:'date'},
+    {k:'Deadline',l:'Deadline',t:'date'},
+    {k:'Evidence_url',l:'Evidence URL',t:'url'},
+    {k:'Reason_for_delay',l:'Reason for Delay',t:'textarea'},
+    {k:'Photo_url',l:'Photo URL',t:'url'},
+  ]},
+  'Bills & Laws':{label:'Bills & Laws',icon:'🏛️',fields:[
+    {k:'title',l:'Bill / Law Title',t:'text',req:true},
+    {k:'bill_number',l:'Bill Number',t:'text'},
+    {k:'stage',l:'Stage',t:'text'},
+    {k:'category',l:'Category',t:'select',opts:['Government Bill','Private Member Bill','Constitutional Amendment','County Legislation']},
+    {k:'summary',l:'Plain Language Summary',t:'textarea',req:true},
+    {k:'impact',l:'Impact on Citizens',t:'textarea'},
+    {k:'sector',l:'Sector',t:'select',opts:['Education','Health','Finance','Agriculture','Security','Environment','Devolution','Labour','Infrastructure','Social Protection','Other']},
+    {k:'official_url',l:'Official URL (Kenya Law)',t:'url'},
+    {k:'date_tabled',l:'Date Tabled',t:'date'},
+    {k:'status',l:'Status',t:'select',opts:['First Reading','Second Reading','Committee Stage','Third Reading','Passed','Assented','Withdrawn']},
+  ]},
+  'citizen_reports':{label:'Citizen Reports',icon:'📸',fields:[
+    {k:'Reporter_Name',l:'Reporter Name',t:'text'},
+    {k:'Reporter_phone',l:'Reporter Phone',t:'text'},
+    {k:'Ward',l:'Ward',t:'ward'},
+    {k:'Report_type',l:'Report Type',t:'text'},
+    {k:'Description',l:'Description',t:'textarea'},
+    {k:'Location',l:'Location',t:'text'},
+    {k:'Status',l:'Status',t:'select',opts:['Pending','Verified','Published','Rejected']},
+    {k:'Reference_Number',l:'Reference Number',t:'text'},
+  ]},
+  'staff':{label:'Staff',icon:'👷',fields:[
+    {k:'name',l:'Full Name',t:'text',req:true},
+    {k:'position',l:'Position',t:'text'},
+    {k:'department',l:'Department',t:'text'},
+    {k:'salary',l:'Salary (KES)',t:'number'},
+    {k:'status',l:'Status',t:'select',opts:['Active','Inactive','Transferred']},
+  ]},
+};
+
+// ── SPECIAL FIELD TYPES ───────────────────────────────────────────────────────
+const WARDS=['Kivaa','Masinga Central','Ndithini','Ekalakala','Muthesya'];
+const FUNDERS=['CDF','County Government','National Government','KeRRA','KURA','NGO/Donor','World Bank','EU','USAID','REA','Other'];
+const STATUSES=['Not Started','Ongoing','Complete','Stalled','Suspended'];
+
+function renderField(f){
+  const id=`field_${f.k}`;
+  const req=f.req?'<span>*</span>':'';
+  let input='';
+  if(f.t==='ward'){
+    input=`<select id="${id}"><option value="">— Select Ward —</option>${WARDS.map(w=>`<option>${w}</option>`).join('')}</select>`;
+  } else if(f.t==='funder'){
+    input=`<select id="${id}"><option value="">— Select Funder —</option>${FUNDERS.map(v=>`<option>${v}</option>`).join('')}</select>`;
+  } else if(f.t==='status'){
+    input=`<select id="${id}"><option value="">— Select Status —</option>${STATUSES.map(v=>`<option>${v}</option>`).join('')}</select>`;
+  } else if(f.t==='select'){
+    input=`<select id="${id}"><option value="">— Select —</option>${(f.opts||[]).map(v=>`<option>${v}</option>`).join('')}</select>`;
+  } else if(f.t==='textarea'){
+    input=`<textarea id="${id}" placeholder="${f.l}…"></textarea>`;
+  } else {
+    input=`<input type="${f.t==='url'?'url':f.t==='number'?'number':f.t==='date'?'date':'text'}" id="${id}" placeholder="${f.l}"/>`;
+  }
+  const full=f.t==='textarea'?' full':'';
+  return`<div class="form-group${full}"><label>${f.l} ${req}</label>${input}</div>`;
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentTable='projects';
+let tableData=[];
+let editingId=null;
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+async function init(){
+  updateClock();
+  setInterval(updateClock,60000);
+  loadCounts();
+  loadTable('projects');
+}
+
+function updateClock(){
+  const now=new Date();
+  document.getElementById('adminTime').textContent=now.toLocaleString('en-KE',{dateStyle:'medium',timeStyle:'short'});
+}
+
+async function loadCounts(){
+  const tableKeys=Object.keys(TABLES);
+  for(const key of tableKeys){
+    try{
+      const{count}=await db.from(key).select('*',{count:'exact',head:true});
+      const navId=key==='Bills & Laws'?'bills':key;
+      const el=document.getElementById(`cnt-${navId}`)||document.getElementById(`cnt-${key}`);
+      if(el)el.textContent=count??0;
+    }catch(e){}
+  }
+}
+
+// ── LOAD TABLE ────────────────────────────────────────────────────────────────
+async function loadTable(tableName){
+  currentTable=tableName;
+  editingId=null;
+  const cfg=TABLES[tableName];
+  if(!cfg)return;
+
+  // Update sidebar
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  const navId=tableName==='Bills & Laws'?'nav-bills':`nav-${tableName}`;
+  const navEl=document.getElementById(navId);
+  if(navEl)navEl.classList.add('active');
+
+  document.getElementById('contentTitle').textContent=`${cfg.icon} ${cfg.label}`;
+  document.getElementById('contentSubtitle').textContent=`Add, edit and manage ${cfg.label.toLowerCase()} records`;
+
+  // Close form
+  document.getElementById('formPanel').classList.remove('open');
+
+  // Build form fields
+  document.getElementById('formFields').innerHTML=cfg.fields.map(f=>renderField(f)).join('');
+
+  // Load data
+  document.getElementById('tableBody').innerHTML=`<tr><td colspan="20" class="loading-table">Loading ${cfg.label}…</td></tr>`;
+  const{data,error}=await db.from(tableName).select('*').order('id',{ascending:false}).limit(100);
+  if(error){
+    document.getElementById('tableBody').innerHTML=`<tr><td colspan="20" class="loading-table">Could not load data.</td></tr>`;
+    return;
+  }
+  tableData=data||[];
+  renderTable(cfg,tableData);
+}
+
+// ── RENDER TABLE ──────────────────────────────────────────────────────────────
+function renderTable(cfg,data){
+  const visibleFields=cfg.fields.slice(0,6);
+  document.getElementById('tableHead').innerHTML=`<tr>${visibleFields.map(f=>`<th>${f.l}</th>`).join('')}<th>Actions</th></tr>`;
+  if(!data.length){
+    document.getElementById('tableBody').innerHTML=`<tr><td colspan="${visibleFields.length+1}" class="empty-table">No records yet. Click ➕ Add New Record to get started.</td></tr>`;
+    return;
+  }
+  document.getElementById('tableBody').innerHTML=data.map(row=>`
+    <tr>
+      ${visibleFields.map(f=>{
+        const val=row[f.k]??'—';
+        if(f.k==='Status'||f.k==='status'){
+          const l=(val+'').toLowerCase();
+          const cls=l.includes('complet')||l.includes('approv')||l.includes('disburse')?'pill-green':l.includes('ongo')||l.includes('pending')?'pill-yellow':l.includes('stall')||l.includes('reject')?'pill-red':'pill-gray';
+          return`<td><span class="status-pill ${cls}">${val}</span></td>`;
+        }
+        return`<td>${(val+'').substring(0,40)}</td>`;
+      }).join('')}
+      <td><div class="td-actions">
+        <button class="edit-btn" onclick="editRecord(${row.id})">✏️ Edit</button>
+        <button class="del-btn" onclick="deleteRecord(${row.id})">🗑️</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+// ── FORM TOGGLE ───────────────────────────────────────────────────────────────
+function toggleForm(){
+  const panel=document.getElementById('formPanel');
+  if(panel.classList.contains('open')){
+    panel.classList.remove('open');
+    editingId=null;
+    document.getElementById('formTitle').textContent='Add New Record';
+  } else {
+    panel.classList.add('open');
+    panel.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+
+// ── EDIT ──────────────────────────────────────────────────────────────────────
+function editRecord(id){
+  const row=tableData.find(r=>r.id===id);
+  if(!row)return;
+  editingId=id;
+  const cfg=TABLES[currentTable];
+  cfg.fields.forEach(f=>{
+    const el=document.getElementById(`field_${f.k}`);
+    if(el&&row[f.k]!=null)el.value=row[f.k];
+  });
+  document.getElementById('formTitle').textContent='✏️ Edit Record';
+  const panel=document.getElementById('formPanel');
+  panel.classList.add('open');
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── SAVE ──────────────────────────────────────────────────────────────────────
+async function saveRecord(){
+  const cfg=TABLES[currentTable];
+  const payload={};
+  let valid=true;
+  cfg.fields.forEach(f=>{
+    const el=document.getElementById(`field_${f.k}`);
+    if(!el)return;
+    const val=el.value.trim();
+    if(f.req&&!val){alert(`Please fill in: ${f.l}`);el.focus();valid=false;return;}
+    if(val){payload[f.k]=f.t==='number'?Number(val):val;}
+  });
+  if(!valid)return;
+  const btn=document.getElementById('saveBtn');
+  btn.disabled=true;btn.textContent='Saving…';
+  try{
+    let error;
+    if(editingId){
+      ({error}=await db.from(currentTable).update(payload).eq('id',editingId));
+    } else {
+      ({error}=await db.from(currentTable).insert([payload]));
+    }
+    if(error)throw error;
+    showToast(editingId?'Record updated!':'Record saved!');
+    toggleForm();
+    loadTable(currentTable);
+    loadCounts();
+  }catch(e){
+    showToast('Could not save: '+e.message,'error');
+  }
+  btn.disabled=false;btn.textContent='Save Record';
+}
+
+// ── DELETE ────────────────────────────────────────────────────────────────────
+async function deleteRecord(id){
+  if(!confirm('Delete this record? This cannot be undone.'))return;
+  const{error}=await db.from(currentTable).delete().eq('id',id);
+  if(error){showToast('Could not delete: '+error.message,'error');return;}
+  showToast('Record deleted.');
+  loadTable(currentTable);
+  loadCounts();
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className=`toast${type==='error'?' error':''}`;
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
+}
+
+document.getElementById('pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin();});
+</script>
+</body>
+</html>
