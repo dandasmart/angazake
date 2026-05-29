@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Promises Tracker — Angazake</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#0d1117;--paper:#f9f7f2;--green:#1a6b3c;--green-light:#e8f4ed;--gold:#c8860a;--red:#c0392b;--muted:#6b7280;--border:#e2ddd6;--card:#ffffff;--radius:12px;--accent:#7c3aed;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+nav{position:sticky;top:0;z-index:100;background:rgba(249,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5vw}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-brand span{background:var(--green);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.8rem}
+.nav-links{display:flex;gap:16px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:0.83rem;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.nav-back{font-size:0.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.hamburger{display:none;flex-direction:column;gap:5px;background:transparent;border:none;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--ink);border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.mobile-menu{display:none;flex-direction:column;background:#fff;border-top:1px solid var(--border);padding:16px 5vw 24px;gap:2px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:12px 16px;font-size:0.95rem;color:var(--ink);text-decoration:none;border-radius:8px;font-weight:500}
+.mobile-menu-wards{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--border);margin-top:8px;padding-top:8px}
+.mobile-menu-wards a{padding:10px 16px;font-size:0.88rem;color:var(--muted);text-decoration:none;border-radius:8px}
+@media(max-width:900px){.hamburger{display:flex}.nav-back{display:none}}
+@media(max-width:768px){.nav-links{display:none}}
+.page-header{background:var(--accent);color:#fff;padding:48px 5vw}
+.page-header-inner{max-width:1200px;margin:0 auto}
+.page-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px}
+.page-header h1{font-family:'Sora',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.1;margin-bottom:12px}
+.page-header p{color:rgba(255,255,255,0.75);font-size:0.95rem;max-width:580px}
+.stats-bar{max-width:1200px;margin:-24px auto 0;padding:0 5vw;position:relative;z-index:10}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 4px 16px rgba(0,0,0,0.06);text-align:center}
+.stat-num{font-family:'Sora',sans-serif;font-size:1.6rem;font-weight:800;color:var(--accent);line-height:1}
+.stat-label{font-size:0.75rem;color:var(--muted);margin-top:4px}
+.filters-section{max-width:1200px;margin:40px auto 0;padding:0 5vw}
+.filters-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
+.filters-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.filter-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:140px}
+.filter-group label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+select,input[type=text]{padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.88rem;background:#fff;color:var(--ink);outline:none;transition:border-color .2s;width:100%}
+select:focus,input[type=text]:focus{border-color:var(--accent)}
+.filter-btn{background:var(--accent);color:#fff;padding:10px 22px;border:none;border-radius:8px;font-weight:600;font-size:0.88rem;cursor:pointer;font-family:inherit;height:42px;white-space:nowrap}
+.reset-btn{background:transparent;color:var(--muted);padding:10px 16px;border:1px solid var(--border);border-radius:8px;font-weight:500;font-size:0.88rem;cursor:pointer;font-family:inherit;height:42px}
+.view-toggle{display:flex;gap:8px;margin-left:auto}
+.view-btn{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:0.85rem;transition:all .2s;color:var(--muted)}
+.view-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.results-section{max-width:1200px;margin:24px auto;padding:0 5vw 60px}
+.results-count{font-size:0.85rem;color:var(--muted);margin-bottom:16px}
+.results-count strong{color:var(--ink)}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.record-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:box-shadow .2s}
+.record-card:hover{box-shadow:0 6px 24px rgba(0,0,0,0.09)}
+.card-photo{height:150px;background:linear-gradient(135deg,#e8f4ed,#d6e8f0);display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;overflow:hidden}
+.card-photo img{width:100%;height:100%;object-fit:cover}
+.card-body{padding:18px}
+.card-name{font-family:'Sora',sans-serif;font-weight:700;font-size:0.95rem;margin-bottom:8px;line-height:1.3}
+.card-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.card-ward{font-size:0.73rem;background:var(--green-light);color:var(--green);padding:3px 10px;border-radius:99px;font-weight:600}
+.card-type{font-size:0.73rem;background:#f3f4f6;color:var(--muted);padding:3px 10px;border-radius:99px}
+.card-detail{font-size:0.8rem;color:var(--muted);margin-bottom:4px}
+.progress-bar{height:5px;background:#e5e7eb;border-radius:99px;margin-top:8px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:99px}
+.card-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-cost{font-family:'Sora',sans-serif;font-size:0.85rem;font-weight:700}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.73rem;font-weight:600}
+.s-complete,.s-approved{background:#dcfce7;color:#166534}
+.s-ongoing,.s-pending{background:#fef9c3;color:#854d0e}
+.s-stalled,.s-rejected{background:#fee2e2;color:#991b1b}
+.s-default{background:#f3f4f6;color:#374151}
+.table-view{display:none}
+.data-table-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.84rem;min-width:700px}
+thead{background:var(--ink)}
+th{padding:12px 16px;text-align:left;font-size:0.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.7)}
+td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--ink);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--paper)}
+.empty-state{padding:60px 24px;text-align:center;color:var(--muted)}
+.empty-icon{font-size:3rem;margin-bottom:16px}
+.empty-state h3{font-family:'Sora',sans-serif;font-size:1.1rem;color:var(--ink);margin-bottom:8px}
+.loading-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius);height:260px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+footer{background:var(--ink);color:#9ca3af;padding:32px 5vw;margin-top:20px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:'Sora',sans-serif;font-weight:800;color:#fff;font-size:1rem}
+.footer-links a{font-size:0.82rem;color:#9ca3af;text-decoration:none;margin-left:20px;transition:color .2s}
+.footer-links a:hover{color:#fff}
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}.filters-row{flex-direction:column}.view-toggle{display:none}}
+
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">💡 Angazake <span>PILOT</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="roads.html">Roads</a></li>
+      <li><a href="health.html" >🏥 Health</a></li>
+      <li><a href="water.html" >💧 Water</a></li>
+      <li><a href="schools.html" >🏫 Schools</a></li>
+      <li><a href="promises.html" class="active">🤝 Promises</a></li>
+      <li><a href="search.html">🔍 Search</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a class="nav-back" href="index.html">← Home</a>
+      <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html" onclick="toggleMobileMenu()">🏠 Home</a>
+    <a href="projects.html" onclick="toggleMobileMenu()">🏗️ Projects</a>
+    <a href="roads.html" onclick="toggleMobileMenu()">🛣️ Roads</a>
+    <a href="health.html" onclick="toggleMobileMenu()">🏥 Health</a>
+    <a href="water.html" onclick="toggleMobileMenu()">💧 Water</a>
+    <a href="schools.html" onclick="toggleMobileMenu()">🏫 Schools</a>
+    <a href="promises.html" onclick="toggleMobileMenu()">🤝 Promises</a>
+    <a href="bills.html" onclick="toggleMobileMenu()">🏛️ Parliament</a>
+    <a href="search.html" onclick="toggleMobileMenu()">🔍 Search</a>
+    <a href="report.html" onclick="toggleMobileMenu()">📸 Report</a>
+    <a href="about.html" onclick="toggleMobileMenu()">ℹ️ About</a>
+    <div class="mobile-menu-wards">
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;padding:8px 0 4px">Ward Dashboards</div>
+      <a href="kivaa.html" onclick="toggleMobileMenu()">📍 Kivaa Ward</a>
+      <a href="masinga-central.html" onclick="toggleMobileMenu()">📍 Masinga Central</a>
+      <a href="ndithini.html" onclick="toggleMobileMenu()">📍 Ndithini Ward</a>
+      <a href="ekalakala.html" onclick="toggleMobileMenu()">📍 Ekalakala Ward</a>
+      <a href="muthesya.html" onclick="toggleMobileMenu()">📍 Muthesya Ward</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-tag">Masinga Sub-County · Leadership Accountability</div>
+    <h1>🤝 Promises Tracker</h1>
+    <p>All promises tracker in Masinga Sub-County — tracked by ward, funder, contractor and status.</p>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="stat0">—</div><div class="stat-label">Total promises</div></div>
+<div class="stat-card"><div class="stat-num" id="stat1">—</div><div class="stat-label">Delivered</div></div>
+<div class="stat-card"><div class="stat-num" id="stat2">—</div><div class="stat-label">Ongoing</div></div>
+<div class="stat-card"><div class="stat-num" id="stat3">—</div><div class="stat-label">Not Delivered</div></div>
+  </div>
+</div>
+
+<div class="filters-section">
+  <div class="filters-box" style="margin-top:16px">
+    <div class="filters-row">
+      <div class="filter-group" style="flex:2;min-width:200px">
+        <label>Search</label>
+        <input type="text" id="searchInput" placeholder="Search by name, ward or contractor…"/>
+      </div>
+      <div class="filter-group">
+        <label>Ward</label>
+        <select id="filter_ward">
+          <option value="">All Wards</option>
+          <option>Kivaa</option>
+          <option>Masinga Central</option>
+          <option>Ndithini</option>
+          <option>Ekalakala</option>
+          <option>Muthesya</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Category</label>
+        <select id="filter_category">
+          <option value="">All Categorys</option>
+          <option>Infrastructure</option>
+<option>Education</option>
+<option>Health</option>
+<option>Water</option>
+<option>Security</option>
+<option>Employment</option>
+<option>Social</option>
+<option>Other</option>
+        </select>
+      </div>
+<div class="filter-group">
+        <label>Made By</label>
+        <select id="filter_made_by">
+          <option value="">All Made Bys</option>
+          <option>Hon. Alphonce Mutinda</option>
+<option>Hon. Joshua Kiilu Mwonga</option>
+<option>Hon. Paul Musila</option>
+<option>Hon. Stephen Mwanthi</option>
+<option>Hon. Daniel Musyoka Muindi</option>
+<option>MP</option>
+<option>Senator</option>
+<option>Governor</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="filter_status">
+          <option value="">All Statuses</option>
+          <option>Complete</option>
+          <option>Ongoing</option>
+          <option>Stalled</option>
+          <option>Not Started</option>
+        </select>
+      </div>
+      <button class="filter-btn" onclick="applyFilters()">Search</button>
+      <button class="reset-btn" onclick="resetFilters()">Reset</button>
+      <div class="view-toggle">
+        <button class="view-btn active" id="gridBtn" onclick="setView('grid')">⊞ Grid</button>
+        <button class="view-btn" id="tableBtn" onclick="setView('table')">☰ Table</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="results-section">
+  <div class="results-count" id="resultsCount">Loading...</div>
+  <div id="gridView">
+    <div class="loading-grid" id="loadingSkeletons">
+      <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+    </div>
+    <div class="cards-grid" id="cardsGrid" style="display:none"></div>
+  </div>
+  <div class="table-view" id="tableView">
+    <div class="data-table-wrap">
+      <table>
+        <thead><tr><th>Promise</th>
+<th>Made By</th>
+<th>Ward</th>
+<th>Category</th>
+<th>Deadline</th>
+<th>Status</th>
+<th>Date Made</th>
+<th>Actions</th></tr></thead>
+        <tbody id="dataTable"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="empty-state" id="emptyState" style="display:none">
+    <div class="empty-icon">🤝</div>
+    <h3>No records found</h3>
+    <p>Try adjusting your filters. Data will appear here once entered via the admin panel.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">💡 Angazake</div>
+    <div style="font-size:0.82rem">Promises Tracker · Masinga Sub-County</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="projects.html">Projects</a>
+      <a href="search.html">Search</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL='https://awbozblyodzinzfhybtg.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3Ym96Ymx5b2R6aW56Zmh5YnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNTg3NzIsImV4cCI6MjA5MzkzNDc3Mn0.l6Gm9RSRbBMirGvff1hU2xgTxY6f0oEHPbSaBN6ORxs';
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let allData=[];
+
+function badge(s){
+  if(!s)return'<span class="status-badge s-default">Unknown</span>';
+  const l=s.toLowerCase();
+  const cl=l.includes('complet')||l.includes('approv')?'s-complete':l.includes('ongo')||l.includes('pend')?'s-ongoing':l.includes('stall')||l.includes('reject')?'s-stalled':'s-default';
+  return`<span class="status-badge ${cl}">${s}</span>`;
+}
+
+function fmt(n){
+  if(!n)return'—';
+  const v=Number(n);
+  if(v>=1000000)return`KES ${(v/1000000).toFixed(1)}M`;
+  if(v>=1000)return`KES ${(v/1000).toFixed(0)}K`;
+  return`KES ${v.toLocaleString()}`;
+}
+
+
+function updateStats(data){
+  document.getElementById('stat0').textContent=data.length;
+  document.getElementById('stat1').textContent=data.filter(r=>(r.Status||'').toLowerCase().includes('deliver')&&!(r.Status||'').toLowerCase().includes('not')).length;
+  document.getElementById('stat2').textContent=data.filter(r=>(r.Status||'').toLowerCase().includes('ongo')).length;
+  document.getElementById('stat3').textContent=data.filter(r=>(r.Status||'').toLowerCase().includes('not')||(r.Status||'').toLowerCase().includes('abandon')).length;
+}
+function renderGrid(data){
+  const grid=document.getElementById('cardsGrid');
+  grid.style.display='grid';
+  if(!data.length){document.getElementById('emptyState').style.display='block';grid.style.display='none';return;}
+  document.getElementById('emptyState').style.display='none';
+  grid.innerHTML=data.map(r=>{
+    const l=(r.Status||'').toLowerCase();
+    const icon=l.includes('deliver')&&!l.includes('not')?'✅':l.includes('not')||l.includes('abandon')?'❌':l.includes('ongo')?'🔄':'⏳';
+    return`<div class="record-card">
+      <div class="card-photo" style="font-size:2rem">${icon}</div>
+      <div class="card-body">
+        <div class="card-name">${r.Promise||'Promise'}</div>
+        <div class="card-meta">
+          <span class="card-ward">📍 ${r.Ward||'All Wards'}</span>
+          <span class="card-type">${r.Category||'—'}</span>
+        </div>
+        <div class="card-detail">👤 ${r.Made_by||'—'}</div>
+        <div class="card-detail">📅 Made: ${r.Date_made||'—'}</div>
+        <div class="card-detail">⏰ Deadline: ${r.Deadline||'—'}</div>
+        ${r.Reason_for_delay?`<div class="card-detail" style="color:#dc2626;font-size:0.76rem">⚠️ ${r.Reason_for_delay}</div>`:''}
+        ${r.Evidence_url?`<a href="${r.Evidence_url}" target="_blank" style="font-size:0.78rem;color:var(--accent);text-decoration:none">📄 View Evidence →</a>`:''}
+      </div>
+      <div class="card-footer">
+        <div style="font-size:0.8rem;color:var(--muted)">${r.Category||'—'}</div>
+        ${badge(r.Status)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadData(){
+  const{data,error}=await db.from('promises').select('*').order('id',{ascending:false});
+  document.getElementById('loadingSkeletons').style.display='none';
+  if(error||!data){document.getElementById('emptyState').style.display='block';return;}
+  allData=data;
+  updateStats(data);
+  render(data);
+}
+
+function render(data){
+  document.getElementById('resultsCount').innerHTML=`Showing <strong>${data.length}</strong> of <strong>${allData.length}</strong> records`;
+  renderGrid(data);
+  renderTable(data);
+}
+
+function renderTable(data){
+  const tb=document.getElementById('dataTable');
+  if(!data.length){tb.innerHTML='<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">No records found</td></tr>';return;}
+  tb.innerHTML=data.map(r=>`<tr>${Object.values(r).slice(1,8).map(v=>`<td>${(v||'—').toString().substring(0,40)}</td>`).join('')}<td>${badge(r.Status||r.status)}</td></tr>`).join('');
+}
+
+function applyFilters(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  const ward=document.getElementById('filter_ward').value.toLowerCase();
+  const status=document.getElementById('filter_status').value.toLowerCase();
+  const filtered=allData.filter(r=>{
+    const mq=!q||Object.values(r).some(v=>(v||'').toString().toLowerCase().includes(q));
+    const mw=!ward||(r.Ward||r.ward||'').toLowerCase().includes(ward);
+    const ms=!status||(r.Status||r.status||'').toLowerCase().includes(status);
+    return mq&&mw&&ms;
+  });
+  render(filtered);
+}
+
+function resetFilters(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('filter_ward').value='';
+  document.getElementById('filter_status').value='';
+  render(allData);
+}
+
+function setView(v){
+  document.getElementById('gridView').style.display=v==='grid'?'block':'none';
+  document.getElementById('tableView').style.display=v==='table'?'block':'none';
+  document.getElementById('gridBtn').classList.toggle('active',v==='grid');
+  document.getElementById('tableBtn').classList.toggle('active',v==='table');
+}
+
+function toggleMobileMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')applyFilters();});
+document.addEventListener('DOMContentLoaded',loadData);
+</script>
+</body>
+</html>
