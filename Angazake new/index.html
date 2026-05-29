@@ -157,7 +157,22 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
 .db-status.error{background:#fee2e2;color:#991b1b}
 .db-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
 
+/* HAMBURGER MENU */
+.hamburger{display:none;flex-direction:column;gap:5px;background:transparent;border:none;cursor:pointer;padding:4px;z-index:200}
+.hamburger span{display:block;width:24px;height:2px;background:var(--ink);border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.mobile-menu{display:none;flex-direction:column;background:#fff;border-top:1px solid var(--border);padding:16px 5vw 24px;gap:2px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:12px 16px;font-size:0.95rem;color:var(--ink);text-decoration:none;border-radius:8px;font-weight:500;transition:background .15s}
+.mobile-menu a:hover{background:var(--paper)}
+.mobile-menu-wards{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--border);margin-top:8px;padding-top:8px}
+.mobile-menu-wards a{padding:10px 16px;font-size:0.88rem;color:var(--muted);text-decoration:none;border-radius:8px}
+.mobile-menu-wards a:hover{background:var(--paper);color:var(--ink)}
+
 /* RESPONSIVE */
+@media(max-width:900px){.hamburger{display:flex}.nav-cta{display:none}}
 @media(max-width:768px){
   .stats-bar{grid-template-columns:repeat(2,1fr)}
   .channels-grid{grid-template-columns:1fr}
@@ -177,17 +192,42 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
   <div class="nav-inner">
     <a class="nav-brand" href="#">💡 Angazake <span>PILOT</span></a>
     <ul class="nav-links">
-      <li><a href="#how">How it works</a></li>
-      <li><a href="projects.html">Projects</a></li>
-      <li><a href="roads.html">Roads</a></li>
+      <li><a href="projects.html">🏗️ Projects</a></li>
+      <li><a href="roads.html">🛣️ Roads</a></li>
+      <li><a href="bills.html">🏛️ Parliament</a></li>
       <li><a href="search.html">🔍 Search</a></li>
+      <li><a href="whatsapp.html">💬 WhatsApp</a></li>
       <li><a href="#wards">Wards</a></li>
       <li><a href="#bursary">Bursary</a></li>
       <li><a href="report.html">📸 Report</a></li>
+      <li><a href="about.html">About</a></li>
     </ul>
     <div style="display:flex;align-items:center;gap:10px">
       <div id="dbStatus" class="db-status connecting"><div class="db-dot"></div> <span>Connecting…</span></div>
-      <a href="report.html" class="nav-cta">📸 Report a Project</a>
+      <a href="report.html" class="nav-cta">📸 Report</a>
+      <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html" onclick="toggleMobileMenu()">🏠 Home</a>
+    <a href="projects.html" onclick="toggleMobileMenu()">🏗️ Projects</a>
+    <a href="roads.html" onclick="toggleMobileMenu()">🛣️ Roads</a>
+    <a href="bills.html" onclick="toggleMobileMenu()">🏛️ Parliament & Bills</a>
+    <a href="search.html" onclick="toggleMobileMenu()">🔍 Global Search</a>
+    <a href="#wards" onclick="toggleMobileMenu()">📍 Ward Dashboards</a>
+    <a href="#bursary" onclick="toggleMobileMenu()">📚 Bursary Register</a>
+    <a href="report.html" onclick="toggleMobileMenu()">📸 Report a Project</a>
+    <a href="about.html" onclick="toggleMobileMenu()">ℹ️ About Angazake</a>
+    <div class="mobile-menu-wards">
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;padding:8px 0 4px">Ward Dashboards</div>
+      <a href="kivaa.html" onclick="toggleMobileMenu()">📍 Kivaa Ward</a>
+      <a href="masinga-central.html" onclick="toggleMobileMenu()">📍 Masinga Central</a>
+      <a href="ndithini.html" onclick="toggleMobileMenu()">📍 Ndithini Ward</a>
+      <a href="ekalakala.html" onclick="toggleMobileMenu()">📍 Ekalakala Ward</a>
+      <a href="muthesya.html" onclick="toggleMobileMenu()">📍 Muthesya Ward</a>
     </div>
   </div>
 </nav>
@@ -199,7 +239,9 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
   <p class="hero-sub">Kenya's first sub-county accountability platform. Track every CDF project, bursary, road and promise in real time — on WhatsApp, website and app.</p>
   <div class="hero-actions">
     <a href="#bursary" class="btn-primary">📚 Check Bursary Status</a>
-    <a href="#trackers" class="btn-secondary">↓ View All Trackers</a>
+    <a href="search.html" class="btn-secondary">🔍 Search All Records</a>
+    <a href="report.html" class="btn-secondary">📸 Report a Project</a>
+    <a href="whatsapp.html" class="btn-secondary">💬 Try on WhatsApp</a>
   </div>
   <div class="stats-bar">
     <div class="stat"><div class="stat-num">~65K</div><div class="stat-label">Registered voters</div></div>
@@ -354,14 +396,20 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
     <div class="wa-box">
       <div>
         <div class="wa-number">+254 700 000 000</div>
-        <p style="color:#9ca3af;font-size:0.85rem;margin-top:6px">No download. No sign-up. Works on any phone.</p>
+        <p style="color:#9ca3af;font-size:0.85rem;margin-top:6px">No download. No sign-up. Works on any phone. Bot launching on registration.</p>
         <div class="wa-commands">
           <span class="wa-cmd">HABARI → Main menu</span>
           <span class="wa-cmd">BURSARY → Student lookup</span>
+          <span class="wa-cmd">PROJECTS → Find projects</span>
           <span class="wa-cmd">REPORT → Flag a project</span>
+          <span class="wa-cmd">WARD → Ward dashboard</span>
         </div>
       </div>
-      <a href="https://wa.me/254700000000?text=HABARI" target="_blank" class="wa-cta">💬 Open WhatsApp</a>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">
+        <a href="https://wa.me/254700000000?text=HABARI" target="_blank" class="wa-cta">💬 Open WhatsApp</a>
+      <a href="whatsapp.html" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:14px 24px;border-radius:10px;font-weight:600;font-size:0.92rem;text-decoration:none;transition:background .2s">📖 See All Commands</a>
+        <a href="whatsapp.html" style="color:#9dd5b6;font-size:0.82rem;text-align:center">See all commands →</a>
+      </div>
     </div>
   </div>
 </section>
@@ -375,22 +423,34 @@ footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid
     </div>
     <div class="footer-col">
       <h4>Platform</h4>
-      <a href="#trackers">All trackers</a>
-      <a href="#bursary">Bursary register</a>
-      <a href="#wards">Ward dashboards</a>
-      <a href="#">Download app</a>
+      <a href="projects.html">Projects Tracker</a>
+      <a href="roads.html">Roads Tracker</a>
+      <a href="bills.html">Parliament & Bills</a>
+      <a href="search.html">Global Search</a>
+      <a href="report.html">Report a Project</a>
     </div>
     <div class="footer-col">
-      <h4>Contact</h4>
-      <a href="#whatsapp">WhatsApp us</a>
-      <a href="#">Email the team</a>
-      <a href="#">Report an issue</a>
-      <a href="#">Partner with us</a>
+      <h4>Wards</h4>
+      <a href="kivaa.html">Kivaa Ward</a>
+      <a href="masinga-central.html">Masinga Central</a>
+      <a href="ndithini.html">Ndithini Ward</a>
+      <a href="ekalakala.html">Ekalakala Ward</a>
+      <a href="muthesya.html">Muthesya Ward</a>
+    </div>
+    <div class="footer-col">
+      <h4>About</h4>
+      <a href="about.html">About Angazake</a>
+      <a href="about.html#contact">Contact Us</a>
+      <a href="about.html">Partner with us</a>
+      <a href="#bursary">Bursary Register</a>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 Angazake — Kenya's Sub-County Accountability Platform</span>
-    <span>#Angazake · #Wazi2027</span>
+    <span>© 2026 Angazake — Kenya's Sub-County Accountability Platform · Wazi. Sasa. Kwa Wote.</span>
+    <span style="display:flex;gap:16px;align-items:center">
+      <span>#Angazake · #Wazi2027</span>
+      <a href="admin.html" style="color:#374151;font-size:0.7rem;text-decoration:none">⚙</a>
+    </span>
   </div>
 </footer>
 
@@ -403,27 +463,27 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── TRACKER CONFIG ──────────────────────────────────────────────────────────
 const TRACKERS = [
-  { emoji:'💰', name:'CDF Projects',       table:'projects',          filter:null,           link:'projects.html' },
-  { emoji:'🏥', name:'Health Facilities',  table:'health_facilities', filter:null,           link:'#' },
-  { emoji:'🛣️', name:'Roads',             table:'Roads',             filter:null,           link:'roads.html' },
-  { emoji:'📚', name:'Bursaries',         table:'bursaries',         filter:null,           link:'#bursary' },
-  { emoji:'🎓', name:'Sponsored Students', table:'bursaries',        filter:{status:'disbursed'}, link:'#bursary' },
-  { emoji:'🏫', name:'Schools & TVETs',    table:'schools',           filter:null,           link:'#' },
-  { emoji:'💧', name:'Water Projects',     table:'water_projects',    filter:null,           link:'#' },
-  { emoji:'🏪', name:'Markets',           table:'markets',           filter:null,           link:'#' },
-  { emoji:'👥', name:'Chamas & SACCOs',   table:'chamas_saccos',     filter:null,           link:'#' },
-  { emoji:'👷', name:'Staff & Workers',   table:'staff',             filter:null,           link:'#' },
-  { emoji:'⚡', name:'Electrification',   table:'electrification',   filter:null,           link:'#' },
-  { emoji:'🔒', name:'Security Projects', table:'security_projects', filter:null,           link:'#' },
-  { emoji:'⚽', name:'Sports & Clubs',    table:'sports_clubs',      filter:null,           link:'#' },
-  { emoji:'🌱', name:'Climate & Env.',    table:'climate_projects',  filter:null,           link:'#' },
-  { emoji:'🤝', name:'Donations',         table:'donations',         filter:null,           link:'#' },
-  { emoji:'🏘️', name:'MCA Projects',     table:'mca_projects',      filter:null,           link:'#' },
-  { emoji:'🏛️', name:'National Govt',    table:'national_projects', filter:null,           link:'#' },
-  { emoji:'📋', name:'Contracts & Audits',table:'contracts',         filter:null,           link:'#' },
-  { emoji:'🤝', name:'Promises Tracker',  table:'promises',          filter:null,           link:'#' },
-  { emoji:'🗺️', name:'County Projects',  table:'county_projects',   filter:null,           link:'#' },
-  { emoji:'📊', name:'Citizen Reports',   table:'citizen_reports',   filter:null,           link:'#' },
+  { emoji:'💰', name:'CDF Projects',       table:'projects',          filter:null,                    link:'projects.html' },
+  { emoji:'🏥', name:'Health Facilities',  table:'health_facilities', filter:null,                    link:'health.html' },
+  { emoji:'🛣️', name:'Roads',             table:'Roads',             filter:null,                    link:'roads.html' },
+  { emoji:'📚', name:'Bursaries',         table:'bursaries',         filter:null,                    link:'#bursary' },
+  { emoji:'🎓', name:'Sponsored Students', table:'bursaries',        filter:{status:'disbursed'},     link:'#bursary' },
+  { emoji:'🏫', name:'Schools & TVETs',    table:'schools',           filter:null,                    link:'schools.html' },
+  { emoji:'💧', name:'Water Projects',     table:'water_projects',    filter:null,                    link:'water.html' },
+  { emoji:'🏪', name:'Markets',           table:'markets',           filter:null,                    link:'search.html?q=market' },
+  { emoji:'👥', name:'Chamas & SACCOs',   table:'chamas_saccos',     filter:null,                    link:'search.html?q=chama' },
+  { emoji:'👷', name:'Staff & Workers',   table:'staff',             filter:null,                    link:'about.html' },
+  { emoji:'⚡', name:'Electrification',   table:'electrification',   filter:null,                    link:'search.html?q=electrification' },
+  { emoji:'🔒', name:'Security Projects', table:'security_projects', filter:null,                    link:'search.html?q=security' },
+  { emoji:'⚽', name:'Sports & Clubs',    table:'sports_clubs',      filter:null,                    link:'search.html?q=sports' },
+  { emoji:'🌱', name:'Climate & Env.',    table:'climate_projects',  filter:null,                    link:'search.html?q=climate' },
+  { emoji:'🤝', name:'Donations',         table:'donations',         filter:null,                    link:'search.html?q=donation' },
+  { emoji:'🏘️', name:'MCA Projects',     table:'mca_projects',      filter:null,                    link:'projects.html' },
+  { emoji:'🏛️', name:'National Govt',    table:'national_projects', filter:null,                    link:'projects.html' },
+  { emoji:'📋', name:'Contracts & Audits',table:'contracts',         filter:null,                    link:'search.html?q=contract' },
+  { emoji:'🤝', name:'Promises Tracker',  table:'promises',          filter:null,                    link:'promises.html' },
+  { emoji:'🗺️', name:'County Projects',  table:'county_projects',   filter:null,                    link:'projects.html' },
+  { emoji:'📊', name:'Citizen Reports',   table:'citizen_reports',   filter:null,                    link:'report.html' },
 ];
 
 // ── DB STATUS INDICATOR ─────────────────────────────────────────────────────
@@ -581,6 +641,14 @@ async function searchBursary() {
 document.getElementById('bursaryInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') searchBursary();
 });
+
+// ── MOBILE MENU ──────────────────────────────────────────────────────────────
+function toggleMobileMenu(){
+  const menu=document.getElementById('mobileMenu');
+  const btn=document.getElementById('hamburger');
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+}
 
 // ── INIT ────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
