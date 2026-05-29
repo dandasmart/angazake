@@ -464,12 +464,12 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ── TRACKER CONFIG ──────────────────────────────────────────────────────────
 const TRACKERS = [
   { emoji:'💰', name:'CDF Projects',       table:'projects',          filter:null,                    link:'projects.html' },
-  { emoji:'🏥', name:'Health Facilities',  table:'health_facilities', filter:null,                    link:'search.html?q=health' },
+  { emoji:'🏥', name:'Health Facilities',  table:'health_facilities', filter:null,                    link:'health.html' },
   { emoji:'🛣️', name:'Roads',             table:'Roads',             filter:null,                    link:'roads.html' },
   { emoji:'📚', name:'Bursaries',         table:'bursaries',         filter:null,                    link:'#bursary' },
   { emoji:'🎓', name:'Sponsored Students', table:'bursaries',        filter:{status:'disbursed'},     link:'#bursary' },
-  { emoji:'🏫', name:'Schools & TVETs',    table:'schools',           filter:null,                    link:'search.html?q=school' },
-  { emoji:'💧', name:'Water Projects',     table:'water_projects',    filter:null,                    link:'search.html?q=water' },
+  { emoji:'🏫', name:'Schools & TVETs',    table:'schools',           filter:null,                    link:'schools.html' },
+  { emoji:'💧', name:'Water Projects',     table:'water_projects',    filter:null,                    link:'water.html' },
   { emoji:'🏪', name:'Markets',           table:'markets',           filter:null,                    link:'search.html?q=market' },
   { emoji:'👥', name:'Chamas & SACCOs',   table:'chamas_saccos',     filter:null,                    link:'search.html?q=chama' },
   { emoji:'👷', name:'Staff & Workers',   table:'staff',             filter:null,                    link:'about.html' },
@@ -481,7 +481,7 @@ const TRACKERS = [
   { emoji:'🏘️', name:'MCA Projects',     table:'mca_projects',      filter:null,                    link:'projects.html' },
   { emoji:'🏛️', name:'National Govt',    table:'national_projects', filter:null,                    link:'projects.html' },
   { emoji:'📋', name:'Contracts & Audits',table:'contracts',         filter:null,                    link:'search.html?q=contract' },
-  { emoji:'🤝', name:'Promises Tracker',  table:'promises',          filter:null,                    link:'search.html?q=promise' },
+  { emoji:'🤝', name:'Promises Tracker',  table:'promises',          filter:null,                    link:'promises.html' },
   { emoji:'🗺️', name:'County Projects',  table:'county_projects',   filter:null,                    link:'projects.html' },
   { emoji:'📊', name:'Citizen Reports',   table:'citizen_reports',   filter:null,                    link:'report.html' },
 ];
