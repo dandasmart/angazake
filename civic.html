@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Civic Education — Angazake</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--ink:#0d1117;--paper:#f9f7f2;--green:#1a6b3c;--green-light:#e8f4ed;--gold:#c8860a;--gold-light:#fdf3e0;--red:#c0392b;--blue:#1a4a7a;--purple:#6d28d9;--muted:#6b7280;--border:#e2ddd6;--card:#ffffff;--radius:12px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(249,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5vw}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--green);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-brand span{background:var(--green);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.8rem}
+.nav-links{display:flex;gap:16px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:0.83rem;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.nav-back{font-size:0.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.hamburger{display:none;flex-direction:column;gap:5px;background:transparent;border:none;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--ink);border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.mobile-menu{display:none;flex-direction:column;background:#fff;border-top:1px solid var(--border);padding:16px 5vw 24px;gap:2px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:12px 16px;font-size:0.95rem;color:var(--ink);text-decoration:none;border-radius:8px;font-weight:500}
+.mobile-menu-wards{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--border);margin-top:8px;padding-top:8px}
+.mobile-menu-wards a{padding:10px 16px;font-size:0.88rem;color:var(--muted);text-decoration:none;border-radius:8px}
+@media(max-width:900px){.hamburger{display:flex}.nav-back{display:none}}
+@media(max-width:768px){.nav-links{display:none}}
+
+/* HERO */
+.page-hero{background:linear-gradient(135deg,#1a3c5e,#1a6b3c);color:#fff;padding:56px 5vw}
+.page-hero-inner{max-width:1100px;margin:0 auto}
+.page-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px}
+.page-hero h1{font-family:'Sora',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.1;margin-bottom:12px}
+.page-hero p{color:rgba(255,255,255,0.75);font-size:0.95rem;max-width:600px;margin-bottom:24px}
+.hero-pills{display:flex;gap:8px;flex-wrap:wrap}
+.hero-pill{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);padding:6px 14px;border-radius:99px;font-size:0.78rem;color:#fff;font-weight:600}
+
+/* CATEGORY TABS */
+.tabs-section{background:#fff;border-bottom:1px solid var(--border);padding:0 5vw;position:sticky;top:60px;z-index:90}
+.tabs-inner{max-width:1100px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:12px 0}
+.cat-tab{padding:8px 18px;border-radius:99px;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;border:1px solid var(--border);color:var(--muted);background:#fff}
+.cat-tab:hover{border-color:var(--green);color:var(--green)}
+.cat-tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* MAIN LAYOUT */
+.main-section{max-width:1100px;margin:0 auto;padding:40px 5vw 60px;display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start}
+
+/* CONTENT CARDS */
+.content-list{display:flex;flex-direction:column;gap:20px}
+.civic-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:box-shadow .2s}
+.civic-card:hover{box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+.card-top{padding:20px 24px 0}
+.card-category{display:inline-flex;align-items:center;gap:6px;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:4px 12px;border-radius:99px;margin-bottom:12px}
+.cat-finance{background:#fef3c7;color:#92400e}
+.cat-budget{background:#dbeafe;color:#1e40af}
+.cat-rights{background:#f3e8ff;color:#6d28d9}
+.cat-cdf{background:var(--green-light);color:var(--green)}
+.cat-devolution{background:#fee2e2;color:#991b1b}
+.cat-elections{background:var(--gold-light);color:var(--gold)}
+.cat-participation{background:#e0f2fe;color:#0369a1}
+.card-title{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;line-height:1.3;margin-bottom:8px}
+.card-subtitle{font-size:0.85rem;color:var(--muted);margin-bottom:16px}
+
+/* ACCORDION */
+.accordion-list{border-top:1px solid var(--border)}
+.accordion-item{border-bottom:1px solid var(--border)}
+.accordion-trigger{width:100%;background:none;border:none;padding:14px 24px;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-family:inherit;font-size:0.88rem;font-weight:600;color:var(--ink);transition:background .15s}
+.accordion-trigger:hover{background:var(--paper)}
+.accordion-trigger.open{color:var(--green)}
+.accordion-arrow{font-size:0.75rem;transition:transform .2s;color:var(--muted)}
+.accordion-trigger.open .accordion-arrow{transform:rotate(180deg)}
+.accordion-content{display:none;padding:0 24px 16px;font-size:0.85rem;color:var(--muted);line-height:1.7}
+.accordion-content.open{display:block}
+.accordion-content p{margin-bottom:8px}
+.accordion-content ul{padding-left:20px;margin-bottom:8px}
+.accordion-content ul li{margin-bottom:4px}
+.accordion-content .highlight{background:var(--gold-light);border-left:3px solid var(--gold);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0;font-size:0.83rem;color:#92400e}
+.accordion-content .impact-box{background:var(--green-light);border-left:3px solid var(--green);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0;font-size:0.83rem;color:var(--green)}
+.accordion-content .warning-box{background:#fee2e2;border-left:3px solid var(--red);padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0;font-size:0.83rem;color:var(--red)}
+
+.card-footer-strip{padding:12px 24px;background:var(--paper);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.card-date{font-size:0.75rem;color:var(--muted)}
+.card-share{font-size:0.78rem;color:var(--green);cursor:pointer;font-weight:600;background:none;border:none;font-family:inherit}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;gap:16px}
+.sidebar-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.sidebar-title{font-family:'Sora',sans-serif;font-weight:700;font-size:0.92rem;margin-bottom:14px;color:var(--ink)}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:0.83rem;font-weight:500;transition:background .15s;border:1px solid transparent}
+.sidebar-link:hover{background:var(--paper);border-color:var(--border)}
+.sidebar-link-icon{font-size:1.1rem;flex-shrink:0}
+.glossary-term{padding:8px 0;border-bottom:1px solid var(--border);font-size:0.82rem}
+.glossary-term:last-child{border-bottom:none}
+.glossary-term strong{display:block;color:var(--ink);margin-bottom:2px}
+.glossary-term span{color:var(--muted)}
+.ussd-box{background:var(--ink);border-radius:10px;padding:16px;text-align:center}
+.ussd-code{font-family:'Courier New',monospace;font-size:1.4rem;font-weight:700;color:#86efac;margin-bottom:4px}
+.ussd-desc{font-size:0.75rem;color:#9ca3af}
+.wa-mini-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#fff;padding:10px;border-radius:8px;font-weight:700;font-size:0.85rem;text-decoration:none;margin-top:10px;transition:opacity .2s}
+.wa-mini-btn:hover{opacity:0.88}
+
+/* EMPTY */
+.empty-state{padding:48px 24px;text-align:center;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+.empty-state h3{font-family:'Sora',sans-serif;font-size:1rem;color:var(--ink);margin-bottom:8px}
+
+footer{background:var(--ink);color:#9ca3af;padding:32px 5vw;margin-top:20px}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:'Sora',sans-serif;font-weight:800;color:#fff;font-size:1rem}
+.footer-links a{font-size:0.82rem;color:#9ca3af;text-decoration:none;margin-left:20px;transition:color .2s}
+.footer-links a:hover{color:#fff}
+
+@media(max-width:900px){.main-section{grid-template-columns:1fr}.sidebar{display:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">💡 Angazake <span>PILOT</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="bills.html">🏛️ Parliament</a></li>
+      <li><a href="civic.html" class="active">📖 Civic Ed</a></li>
+      <li><a href="promises.html">🤝 Promises</a></li>
+      <li><a href="search.html">🔍 Search</a></li>
+      <li><a href="report.html">📸 Report</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a class="nav-back" href="index.html">← Home</a>
+      <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html" onclick="toggleMobileMenu()">🏠 Home</a>
+    <a href="projects.html" onclick="toggleMobileMenu()">🏗️ Projects</a>
+    <a href="bills.html" onclick="toggleMobileMenu()">🏛️ Parliament & Bills</a>
+    <a href="civic.html" onclick="toggleMobileMenu()">📖 Civic Education</a>
+    <a href="promises.html" onclick="toggleMobileMenu()">🤝 Promises Tracker</a>
+    <a href="search.html" onclick="toggleMobileMenu()">🔍 Global Search</a>
+    <a href="report.html" onclick="toggleMobileMenu()">📸 Report a Project</a>
+    <a href="about.html" onclick="toggleMobileMenu()">ℹ️ About Angazake</a>
+    <div class="mobile-menu-wards">
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;padding:8px 0 4px">Ward Dashboards</div>
+      <a href="kivaa.html" onclick="toggleMobileMenu()">📍 Kivaa Ward</a>
+      <a href="masinga-central.html" onclick="toggleMobileMenu()">📍 Masinga Central</a>
+      <a href="ndithini.html" onclick="toggleMobileMenu()">📍 Ndithini Ward</a>
+      <a href="ekalakala.html" onclick="toggleMobileMenu()">📍 Ekalakala Ward</a>
+      <a href="muthesya.html" onclick="toggleMobileMenu()">📍 Muthesya Ward</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-tag">Know Your Rights · Know Your Money · Know Your Government</div>
+    <h1>📖 Civic Education Centre</h1>
+    <p>Plain-language explanations of Kenya's laws, budgets, finance bills, your rights as a citizen, how government works, and how to participate. In English and Kiswahili.</p>
+    <div class="hero-pills">
+      <span class="hero-pill">💰 Finance Bill</span>
+      <span class="hero-pill">📊 National Budget</span>
+      <span class="hero-pill">⚖️ Citizen Rights</span>
+      <span class="hero-pill">🏛️ How CDF Works</span>
+      <span class="hero-pill">🗳️ Elections</span>
+      <span class="hero-pill">🤝 Public Participation</span>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORY TABS -->
+<div class="tabs-section">
+  <div class="tabs-inner">
+    <div class="cat-tab active" onclick="filterCat('all')">📋 All Topics</div>
+    <div class="cat-tab" onclick="filterCat('finance')">💰 Finance Bill</div>
+    <div class="cat-tab" onclick="filterCat('budget')">📊 Budget</div>
+    <div class="cat-tab" onclick="filterCat('cdf')">🏗️ CDF & Funds</div>
+    <div class="cat-tab" onclick="filterCat('rights')">⚖️ Citizen Rights</div>
+    <div class="cat-tab" onclick="filterCat('devolution')">🏛️ Devolution</div>
+    <div class="cat-tab" onclick="filterCat('elections')">🗳️ Elections</div>
+    <div class="cat-tab" onclick="filterCat('participation')">🤝 Participation</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-section">
+  <div id="contentList" class="content-list">
+
+    <!-- FINANCE BILL 2024 -->
+    <div class="civic-card" data-cat="finance">
+      <div class="card-top">
+        <div class="card-category cat-finance">💰 Finance Bill</div>
+        <div class="card-title">The Finance Bill 2024 — What It Meant for Kenyans</div>
+        <div class="card-subtitle">The bill that sparked nationwide protests in June 2024 — explained simply for every citizen</div>
+      </div>
+      <div class="accordion-list">
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            What was the Finance Bill 2024? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>The Finance Bill 2024 was a government proposal to introduce new taxes and increase existing ones to raise additional revenue for the government. It was introduced in Parliament in May 2024 by the National Treasury.</p>
+            <p>The bill proposed to raise KES 346 billion in additional taxes — money the government said it needed to pay debts and fund development.</p>
+            <div class="highlight">⚠️ The bill was rejected by Kenyans through mass protests in June 2024 — one of the most significant citizen-led governance actions in Kenya's history.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            What taxes were proposed? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <ul>
+              <li><strong>Bread tax (16% VAT):</strong> Bread was to be taxed for the first time</li>
+              <li><strong>Cooking oil tax (16% VAT):</strong> Edible oils were to be taxed</li>
+              <li><strong>Financial transactions levy (0.05%):</strong> Tax on money transfers including M-Pesa</li>
+              <li><strong>Motor vehicle circulation tax:</strong> Annual tax of KES 5,000–100,000 per vehicle</li>
+              <li><strong>Eco levy:</strong> Tax on imported phones, laptops, diapers, sanitary pads</li>
+              <li><strong>Sugar tax:</strong> Additional levy on sugar</li>
+            </ul>
+            <div class="warning-box">These taxes would have hit ordinary Kenyans hardest — especially on everyday household items.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            What happened — why were protests held? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>Young Kenyans — particularly Gen Z — organised nationwide protests through social media starting June 18, 2024. The protests were remarkable for several reasons:</p>
+            <ul>
+              <li>They were leaderless — organised through WhatsApp, X (Twitter), and TikTok</li>
+              <li>Protestors occupied Parliament buildings on June 25, 2024</li>
+              <li>At least 39 people died and hundreds were injured in clashes with police</li>
+              <li>President Ruto declined to sign the bill on June 26, 2024</li>
+            </ul>
+            <div class="impact-box">✅ Result: The Finance Bill 2024 was officially withdrawn. This proved that citizen action can directly change government policy.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            What does this mean for Masinga citizens? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>The Finance Bill 2024 story teaches Masinga citizens several important lessons:</p>
+            <ul>
+              <li>Citizens have the power to change government decisions when they act together</li>
+              <li>Every tax proposal in Parliament affects your daily life — bread, cooking oil, phone costs</li>
+              <li>You have a right to participate in public discussions on tax bills before they become law</li>
+              <li>Angazake's Parliament page tracks all current bills so you know what is coming</li>
+            </ul>
+            <div class="impact-box">📱 You can track the current Finance Bill and all tax proposals on Angazake's Parliament page.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="card-date">📅 Updated: June 2024</span>
+        <a href="bills.html" style="font-size:0.78rem;color:var(--green);font-weight:600;text-decoration:none">See current bills →</a>
+      </div>
+    </div>
+
+    <!-- 2025/2026 NATIONAL BUDGET -->
+    <div class="civic-card" data-cat="budget">
+      <div class="card-top">
+        <div class="card-category cat-budget">📊 National Budget</div>
+        <div class="card-title">Kenya's 2025/2026 National Budget — What You Need to Know</div>
+        <div class="card-subtitle">Where your tax money goes — broken down simply for every Kenyan</div>
+      </div>
+      <div class="accordion-list">
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            How big is Kenya's budget? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>The 2025/2026 National Budget is approximately KES 4.2 trillion. This is money the national government plans to spend between July 2025 and June 2026.</p>
+            <div class="highlight">💡 KES 4.2 trillion is equivalent to every Kenyan receiving approximately KES 80,000 — yet many citizens feel nothing is being done in their area. Accountability is the missing link.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            Where does the money come from? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <ul>
+              <li><strong>Tax revenue (KRA):</strong> Income tax (PAYE), VAT, excise duty, import duty</li>
+              <li><strong>External loans:</strong> From World Bank, IMF, China, commercial banks</li>
+              <li><strong>Grants:</strong> From donors and development partners</li>
+              <li><strong>Internal borrowing:</strong> Government bonds and treasury bills</li>
+            </ul>
+            <div class="warning-box">⚠️ Over 30% of Kenya's budget goes to debt repayment — meaning less money for roads, hospitals and schools.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            What does Machakos County receive? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>Under Kenya's devolution system, counties receive an equitable share from the national government. Machakos County typically receives approximately KES 6–8 billion annually as its county allocation.</p>
+            <p>Additionally, Masinga Constituency receives a CDF allocation (approximately KES 100–120 million per year) managed by the CDF Board.</p>
+            <div class="impact-box">💡 Angazake tracks how every shilling of CDF and county funds is spent in Masinga Sub-County.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            How can citizens influence the budget? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>Kenya's budget process has several stages where citizens can participate:</p>
+            <ul>
+              <li><strong>Pre-budget public participation:</strong> County governments and Parliament hold meetings before the budget is tabled — you can attend and give views</li>
+              <li><strong>Budget estimates review:</strong> After tabling, parliamentary committees review estimates and accept public submissions</li>
+              <li><strong>CDF committee meetings:</strong> Your constituency has a CDF committee that holds meetings — attend and propose projects</li>
+              <li><strong>County assembly debates:</strong> Watch your county assembly debate the county budget and engage your MCA</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="card-date">📅 Financial Year 2025/2026</span>
+        <a href="projects.html" style="font-size:0.78rem;color:var(--green);font-weight:600;text-decoration:none">Track CDF projects →</a>
+      </div>
+    </div>
+
+    <!-- HOW CDF WORKS -->
+    <div class="civic-card" data-cat="cdf">
+      <div class="card-top">
+        <div class="card-category cat-cdf">🏗️ CDF & Funds</div>
+        <div class="card-title">How CDF Works — Your Constituency Development Fund Explained</div>
+        <div class="card-subtitle">Every constituency in Kenya gets CDF money. Here is how it works, who controls it, and how you benefit.</div>
+      </div>
+      <div class="accordion-list">
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            What is CDF and how much does Masinga get? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>The Constituency Development Fund (CDF) is a fund established by law to channel government money directly to constituencies for development projects. It is managed separately from the county and national government budgets.</p>
+            <p>Masinga Constituency typically receives approximately KES 100–120 million per year. This is your money — as a citizen of Masinga, you have a right to know how it is spent.</p>
+            <div class="impact-box">✅ Angazake tracks all CDF projects in Masinga — roads, classrooms, dispensaries, water projects and more.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            Who controls CDF? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <ul>
+              <li><strong>National CDF Board:</strong> Oversees all CDFs nationally</li>
+              <li><strong>Constituency CDF Committee:</strong> A local committee that approves projects — includes the MP, community representatives, and officials</li>
+              <li><strong>CDF Manager:</strong> A civil servant who manages day-to-day operations of the CDF office</li>
+              <li><strong>The MP:</strong> Chairs the committee but cannot unilaterally approve or spend funds</li>
+            </ul>
+            <div class="warning-box">⚠️ The MP does not own CDF money. It belongs to all citizens of the constituency.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            How do you apply for a CDF project? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>Any community group, institution (school, hospital, church) or village can apply for CDF funding. The process:</p>
+            <ul>
+              <li>Get an application form from the CDF office in Masinga or download online</li>
+              <li>Fill in the project details, cost estimate, and community need</li>
+              <li>Submit to the CDF committee — they meet regularly to review applications</li>
+              <li>If approved, a contractor is procured and the project begins</li>
+              <li>You can track approved projects on Angazake</li>
+            </ul>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            What about Ward Development Fund (WDF)? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>Each of the 5 wards in Masinga Sub-County also receives a Ward Development Fund allocation from the Machakos County Government. This is separate from CDF and is managed by the MCA (Member of County Assembly) through the ward committee.</p>
+            <p>Ward funds typically range from KES 5–15 million per ward per year depending on county allocations.</p>
+            <div class="impact-box">📍 Angazake tracks MCA ward projects separately — visit your ward dashboard to see how ward funds are spent.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="card-date">📅 Updated: 2026</span>
+        <a href="projects.html" style="font-size:0.78rem;color:var(--green);font-weight:600;text-decoration:none">Track CDF projects →</a>
+      </div>
+    </div>
+
+    <!-- CITIZEN RIGHTS -->
+    <div class="civic-card" data-cat="rights">
+      <div class="card-top">
+        <div class="card-category cat-rights">⚖️ Citizen Rights</div>
+        <div class="card-title">Your Rights as a Kenyan Citizen — The Constitution Made Simple</div>
+        <div class="card-subtitle">Kenya's 2010 Constitution gives you powerful rights. Here is what you need to know.</div>
+      </div>
+      <div class="accordion-list">
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            Your right to information (Article 35) <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>Article 35 of the Constitution gives every Kenyan citizen the right to access any information held by the State or any other person that is required for the exercise of any right or fundamental freedom.</p>
+            <div class="impact-box">✅ This means you have a legal right to ask for CDF records, ward fund expenditure, project contracts, and government spending in your area. If refused, you can go to court.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            Your right to public participation (Article 118) <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>The Constitution requires Parliament and county assemblies to facilitate public participation before passing laws or making major decisions. You have the right to:</p>
+            <ul>
+              <li>Be notified of public participation meetings</li>
+              <li>Attend and give your views</li>
+              <li>Submit written memoranda</li>
+              <li>Have your views considered (though not necessarily adopted)</li>
+            </ul>
+            <div class="highlight">💡 Angazake will publish all public participation notices for Machakos County so you never miss a meeting.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            Your right to petition government (Article 119) <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>Any person has the right to petition Parliament to consider any matter within its authority — including demanding action on a stalled project, requesting an audit, or raising a governance concern.</p>
+            <p>You can also petition the county assembly for matters within county jurisdiction.</p>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            How to report corruption in a public project <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>If you suspect corruption in a CDF, ward, county or national project:</p>
+            <ul>
+              <li><strong>Ethics and Anti-Corruption Commission (EACC):</strong> Report online at eacc.go.ke or call 0800 720 617 (toll free)</li>
+              <li><strong>Director of Public Prosecutions (DPP):</strong> For serious corruption cases</li>
+              <li><strong>Controller of Budget:</strong> For misuse of public funds — controller.go.ke</li>
+              <li><strong>Angazake:</strong> Report the stalled or suspicious project on our platform — we verify and publish</li>
+            </ul>
+            <div class="impact-box">📸 Use Angazake's Report page to flag any suspicious project with photos and GPS evidence.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="card-date">📅 Kenya Constitution 2010</span>
+        <a href="report.html" style="font-size:0.78rem;color:var(--green);font-weight:600;text-decoration:none">Report a project →</a>
+      </div>
+    </div>
+
+    <!-- PUBLIC PARTICIPATION -->
+    <div class="civic-card" data-cat="participation">
+      <div class="card-top">
+        <div class="card-category cat-participation">🤝 Public Participation</div>
+        <div class="card-title">How to Participate in Government Decisions — A Practical Guide</div>
+        <div class="card-subtitle">Government is required by law to involve you. Here is how to make your voice count.</div>
+      </div>
+      <div class="accordion-list">
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            What is public participation? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>Public participation is the process by which government — national, county, or parliament — invites citizens to give their views before making decisions, passing laws, or approving budgets. It is a constitutional requirement, not a favour.</p>
+            <div class="highlight">💡 Any law passed without genuine public participation can be challenged in court and declared unconstitutional.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            When and where are public participation meetings held? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>Public participation meetings happen at different levels:</p>
+            <ul>
+              <li><strong>National Parliament:</strong> Committee meetings open to public — advertised in newspapers and Parliament website</li>
+              <li><strong>County Assembly:</strong> Machakos County Assembly holds PP meetings across the county — watch for announcements</li>
+              <li><strong>Ward level:</strong> Your MCA sometimes holds ward meetings — follow their social media or contact their office</li>
+              <li><strong>CDF:</strong> CDF committees hold community meetings to approve projects</li>
+            </ul>
+            <div class="impact-box">📅 Angazake will publish all upcoming public participation notices for Masinga Sub-County and Machakos County.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            How to write a memorandum to Parliament or County Assembly <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <p>A memorandum is a written submission of your views. You do not need a lawyer to write one. A simple memorandum should include:</p>
+            <ul>
+              <li>Your name and contact details</li>
+              <li>The specific law or policy you are commenting on</li>
+              <li>What you support or oppose and why</li>
+              <li>What change you recommend</li>
+              <li>Your signature</li>
+            </ul>
+            <p>Submit to the relevant committee clerk at Parliament or the county assembly speaker's office.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="card-date">📅 Updated: 2026</span>
+        <a href="bills.html" style="font-size:0.78rem;color:var(--green);font-weight:600;text-decoration:none">See current bills →</a>
+      </div>
+    </div>
+
+    <!-- DEVOLUTION -->
+    <div class="civic-card" data-cat="devolution">
+      <div class="card-top">
+        <div class="card-category cat-devolution">🏛️ Devolution</div>
+        <div class="card-title">National vs County Government — Who Does What?</div>
+        <div class="card-subtitle">Understand who is responsible for which services so you know who to hold accountable.</div>
+      </div>
+      <div class="accordion-list">
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            What does the National Government do in Masinga? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <ul>
+              <li><strong>Primary and secondary schools:</strong> Teachers (TSC), examinations (KNEC), curriculum (KICD)</li>
+              <li><strong>National roads:</strong> KeRRA (rural), KURA (urban), KeNHA (highways)</li>
+              <li><strong>Security:</strong> Police, prisons, courts, immigration</li>
+              <li><strong>National hospitals:</strong> Kenyatta National Hospital, referral hospitals</li>
+              <li><strong>Electricity:</strong> REA (rural electrification), KPLC (distribution)</li>
+              <li><strong>CDF:</strong> Managed through the National CDF Board</li>
+            </ul>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            What does Machakos County Government do? <span class="accordion-arrow">▼</span>
+          </button>
+          <div class="accordion-content">
+            <ul>
+              <li><strong>County hospitals and health centres:</strong> Dispensaries, health centres, county referral hospitals</li>
+              <li><strong>County roads:</strong> Grading, gravelling, murram roads within the county</li>
+              <li><strong>Agriculture:</strong> Extension services, livestock, fisheries</li>
+              <li><strong>Markets:</strong> County markets, trading licences</li>
+              <li><strong>Water:</strong> County water supply and sanitation (in some areas)</li>
+              <li><strong>Early childhood education:</strong> Pre-primary schools (ECD)</li>
+              <li><strong>Ward Development Fund:</strong> Through MCAs</li>
+            </ul>
+            <div class="impact-box">💡 If your dispensary has no drugs, hold the county government accountable — not the national government.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer-strip">
+        <span class="card-date">📅 Kenya Constitution 2010</span>
+        <a href="county_projects.html" style="font-size:0.78rem;color:var(--green);font-weight:600;text-decoration:none">County projects →</a>
+      </div>
+    </div>
+
+  </div><!-- end content-list -->
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-title">🔗 Quick Links</div>
+      <a href="bills.html" class="sidebar-link"><span class="sidebar-link-icon">🏛️</span> Parliament & Bills</a>
+      <a href="promises.html" class="sidebar-link"><span class="sidebar-link-icon">🤝</span> Promises Tracker</a>
+      <a href="projects.html" class="sidebar-link"><span class="sidebar-link-icon">🏗️</span> CDF Projects</a>
+      <a href="report.html" class="sidebar-link"><span class="sidebar-link-icon">📸</span> Report a Project</a>
+      <a href="search.html" class="sidebar-link"><span class="sidebar-link-icon">🔍</span> Global Search</a>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">📖 Civic Glossary</div>
+      <div class="glossary-term"><strong>CDF</strong><span>Constituency Development Fund — money allocated to each constituency for development</span></div>
+      <div class="glossary-term"><strong>WDF</strong><span>Ward Development Fund — money allocated to each ward via the MCA</span></div>
+      <div class="glossary-term"><strong>MCA</strong><span>Member of County Assembly — your ward representative in the county assembly</span></div>
+      <div class="glossary-term"><strong>EACC</strong><span>Ethics and Anti-Corruption Commission — where to report corruption</span></div>
+      <div class="glossary-term"><strong>IFMIS</strong><span>Integrated Financial Management System — where government payments are recorded</span></div>
+      <div class="glossary-term"><strong>Equitable Share</strong><span>The portion of national revenue given to county governments</span></div>
+      <div class="glossary-term"><strong>Supplementary Budget</strong><span>A mid-year revision to the national or county budget</span></div>
+    </div>
+
+    <div class="sidebar-card" style="background:var(--ink);border-color:var(--ink)">
+      <div class="sidebar-title" style="color:#fff">💬 Ask on WhatsApp</div>
+      <div class="ussd-box" style="background:rgba(255,255,255,0.08);margin-bottom:0">
+        <div class="ussd-code">ELIMU</div>
+        <div class="ussd-desc">Send ELIMU to get civic education updates on WhatsApp</div>
+      </div>
+      <a href="whatsapp.html" class="wa-mini-btn">💬 Open WhatsApp Bot</a>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-title">📞 Key Contacts</div>
+      <div class="glossary-term"><strong>EACC (Corruption)</strong><span>0800 720 617 (Toll Free)</span></div>
+      <div class="glossary-term"><strong>CDF Board</strong><span>cdfboard.go.ke</span></div>
+      <div class="glossary-term"><strong>Controller of Budget</strong><span>controller.go.ke</span></div>
+      <div class="glossary-term"><strong>Kenya Law</strong><span>kenyalaw.org</span></div>
+      <div class="glossary-term"><strong>Parliament of Kenya</strong><span>parliament.go.ke</span></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">💡 Angazake</div>
+    <div style="font-size:0.82rem">Civic Education · Know Your Rights · Know Your Money</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="bills.html">Parliament</a>
+      <a href="promises.html">Promises</a>
+      <a href="report.html">Report</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleAccordion(btn){
+  const content=btn.nextElementSibling;
+  const isOpen=btn.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.accordion-trigger').forEach(b=>{
+    b.classList.remove('open');
+    b.nextElementSibling.classList.remove('open');
+  });
+  // Open clicked if it was closed
+  if(!isOpen){
+    btn.classList.add('open');
+    content.classList.add('open');
+  }
+}
+
+function filterCat(cat){
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.civic-card').forEach(card=>{
+    if(cat==='all'||card.dataset.cat===cat){
+      card.style.display='block';
+    } else {
+      card.style.display='none';
+    }
+  });
+}
+
+function toggleMobileMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+}
+</script>
+</body>
+</html>
