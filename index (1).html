@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Angazake — Wazi. Sasa. Kwa Wote.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --ink:#0d1117;
+  --paper:#f9f7f2;
+  --green:#1a6b3c;
+  --green-light:#e8f4ed;
+  --gold:#c8860a;
+  --gold-light:#fdf3e0;
+  --red:#c0392b;
+  --blue:#1a4a7a;
+  --muted:#6b7280;
+  --border:#e2ddd6;
+  --card:#ffffff;
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);line-height:1.6}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(249,247,242,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5vw}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px}
+.nav-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.2rem;color:var(--green);display:flex;align-items:center;gap:8px;text-decoration:none}
+.nav-brand span{background:var(--green);color:#fff;padding:2px 8px;border-radius:6px;font-size:0.85rem}
+.nav-links{display:flex;gap:24px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:0.88rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--green)}
+.nav-cta{background:var(--green);color:#fff;padding:8px 18px;border-radius:8px;font-size:0.85rem;font-weight:600;text-decoration:none;transition:opacity .2s}
+.nav-cta:hover{opacity:0.88}
+
+/* HERO */
+.hero{max-width:1200px;margin:0 auto;padding:80px 5vw 60px}
+.hero-pill{display:inline-flex;align-items:center;gap:8px;background:var(--green-light);color:var(--green);font-size:0.8rem;font-weight:600;padding:6px 14px;border-radius:99px;margin-bottom:24px;border:1px solid #b7ddc7}
+.hero-pill::before{content:'';width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+h1{font-family:'Sora',sans-serif;font-size:clamp(2.4rem,5vw,3.8rem);font-weight:800;line-height:1.1;letter-spacing:-0.03em;margin-bottom:20px}
+h1 em{font-style:normal;color:var(--green)}
+.hero-sub{font-size:1.05rem;color:var(--muted);max-width:580px;margin-bottom:36px;font-weight:300}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:56px}
+.btn-primary{background:var(--green);color:#fff;padding:13px 26px;border-radius:10px;font-weight:600;font-size:0.95rem;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,107,60,0.3)}
+.btn-secondary{background:transparent;color:var(--ink);padding:13px 26px;border-radius:10px;font-weight:500;font-size:0.95rem;text-decoration:none;border:1px solid var(--border);display:inline-flex;align-items:center;gap:8px;transition:border-color .2s}
+.btn-secondary:hover{border-color:var(--green)}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+.stat{background:var(--card);padding:20px 24px}
+.stat-num{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;color:var(--green);line-height:1}
+.stat-label{font-size:0.78rem;color:var(--muted);margin-top:4px;font-weight:400}
+
+/* SECTION SHARED */
+section{padding:64px 5vw}
+.section-inner{max-width:1200px;margin:0 auto}
+.section-tag{font-size:0.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:8px}
+.section-title{font-family:'Sora',sans-serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;line-height:1.2;margin-bottom:12px}
+.section-desc{color:var(--muted);max-width:560px;font-size:0.95rem}
+
+/* CHANNELS */
+.channels{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.channels-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px}
+.channel-card{border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:box-shadow .2s}
+.channel-card:hover{box-shadow:0 4px 24px rgba(0,0,0,0.07)}
+.channel-icon{font-size:2rem;margin-bottom:16px}
+.channel-card h3{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:10px}
+.channel-card ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.channel-card li{font-size:0.84rem;color:var(--muted);padding-left:16px;position:relative}
+.channel-card li::before{content:'→';position:absolute;left:0;color:var(--green);font-size:0.8rem}
+
+/* TRACKERS */
+.trackers{background:var(--green);color:#fff}
+.trackers .section-tag{color:#9dd5b6}
+.trackers .section-title{color:#fff}
+.trackers .section-desc{color:#9dd5b6}
+.trackers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:40px}
+.tracker-card{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px;transition:background .2s,transform .2s;cursor:default}
+.tracker-card:hover{background:rgba(255,255,255,0.18);transform:translateY(-2px)}
+.tracker-emoji{font-size:1.4rem}
+.tracker-count{font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;color:#fff}
+.tracker-count.loading{opacity:0.4;font-size:1rem}
+.tracker-name{font-size:0.78rem;color:#9dd5b6;font-weight:500}
+
+/* WARDS */
+.wards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:40px}
+.ward-card{border:1px solid var(--border);border-radius:var(--radius);padding:22px;background:var(--card)}
+.ward-voters{font-family:'Sora',sans-serif;font-size:1.4rem;font-weight:800;color:var(--ink)}
+.ward-name{font-weight:600;font-size:0.95rem;margin:4px 0}
+.ward-badge{display:inline-block;font-size:0.72rem;padding:3px 10px;border-radius:99px;font-weight:600}
+.ward-badge.mustwin{background:#fde8e8;color:var(--red)}
+.ward-badge.consolidate{background:var(--gold-light);color:var(--gold)}
+.ward-badge.defend{background:var(--green-light);color:var(--green)}
+
+/* BURSARY */
+.bursary{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.bursary-box{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:40px}
+.bursary-header{background:var(--ink);color:#fff;padding:18px 24px;display:flex;align-items:center;gap:12px}
+.bursary-header h3{font-family:'Sora',sans-serif;font-size:1rem;font-weight:700}
+.bursary-header p{font-size:0.8rem;color:#9ca3af;margin-top:2px}
+.bursary-search-row{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;gap:10px}
+#bursaryInput{flex:1;padding:11px 16px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.9rem;outline:none;transition:border-color .2s}
+#bursaryInput:focus{border-color:var(--green)}
+#bursaryBtn{background:var(--green);color:#fff;padding:11px 22px;border:none;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;font-family:inherit;transition:opacity .2s;white-space:nowrap}
+#bursaryBtn:hover{opacity:0.88}
+#bursaryBtn:disabled{opacity:0.5;cursor:not-allowed}
+.bursary-table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+thead{background:var(--paper)}
+th{padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--border)}
+td{padding:13px 16px;border-bottom:1px solid var(--border);color:var(--ink)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--paper)}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:600}
+.status-approved{background:#dcfce7;color:#166534}
+.status-pending{background:#fef9c3;color:#854d0e}
+.status-rejected{background:#fee2e2;color:#991b1b}
+.status-disbursed{background:#dbeafe;color:#1e40af}
+.bursary-empty{padding:40px 24px;text-align:center;color:var(--muted);font-size:0.9rem}
+.bursary-empty strong{display:block;font-size:1rem;color:var(--ink);margin-bottom:6px}
+.bursary-hint{padding:12px 24px;font-size:0.8rem;color:var(--muted);border-top:1px solid var(--border);background:var(--paper)}
+
+/* WHATSAPP */
+.whatsapp-section{background:var(--ink);color:#fff}
+.whatsapp-section .section-title{color:#fff}
+.wa-box{margin-top:36px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius);padding:32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.wa-number{font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;color:#25d366;letter-spacing:-0.02em}
+.wa-commands{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.wa-cmd{background:rgba(255,255,255,0.1);padding:6px 14px;border-radius:99px;font-size:0.8rem;font-family:'Courier New',monospace;color:#9dd5b6}
+.wa-cta{background:#25d366;color:#fff;padding:14px 28px;border-radius:10px;font-weight:700;font-size:0.95rem;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;transition:opacity .2s}
+.wa-cta:hover{opacity:0.88}
+
+/* FOOTER */
+footer{background:var(--ink);color:#9ca3af;padding:40px 5vw;border-top:1px solid #1f2937}
+.footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr auto auto;gap:40px;align-items:start}
+.footer-brand{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;margin-bottom:8px}
+.footer-desc{font-size:0.82rem;line-height:1.6;max-width:280px}
+.footer-col h4{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#fff;margin-bottom:12px}
+.footer-col a{display:block;font-size:0.83rem;color:#9ca3af;text-decoration:none;margin-bottom:6px;transition:color .2s}
+.footer-col a:hover{color:#fff}
+.footer-bottom{max-width:1200px;margin:24px auto 0;padding-top:20px;border-top:1px solid #1f2937;font-size:0.78rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+/* DB STATUS INDICATOR */
+.db-status{display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;font-weight:600;padding:4px 12px;border-radius:99px;margin-left:auto}
+.db-status.connected{background:#dcfce7;color:#166534}
+.db-status.connecting{background:#fef9c3;color:#854d0e}
+.db-status.error{background:#fee2e2;color:#991b1b}
+.db-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* HAMBURGER MENU */
+.hamburger{display:none;flex-direction:column;gap:5px;background:transparent;border:none;cursor:pointer;padding:4px;z-index:200}
+.hamburger span{display:block;width:24px;height:2px;background:var(--ink);border-radius:2px;transition:all .3s}
+.hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.mobile-menu{display:none;flex-direction:column;background:#fff;border-top:1px solid var(--border);padding:16px 5vw 24px;gap:2px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:12px 16px;font-size:0.95rem;color:var(--ink);text-decoration:none;border-radius:8px;font-weight:500;transition:background .15s}
+.mobile-menu a:hover{background:var(--paper)}
+.mobile-menu-wards{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--border);margin-top:8px;padding-top:8px}
+.mobile-menu-wards a{padding:10px 16px;font-size:0.88rem;color:var(--muted);text-decoration:none;border-radius:8px}
+.mobile-menu-wards a:hover{background:var(--paper);color:var(--ink)}
+
+/* RESPONSIVE */
+@media(max-width:900px){.hamburger{display:flex}.nav-cta{display:none}}
+@media(max-width:768px){
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .channels-grid{grid-template-columns:1fr}
+  .footer-inner{grid-template-columns:1fr}
+  .nav-links{display:none}
+}
+@media(max-width:500px){
+  .stats-bar{grid-template-columns:1fr 1fr}
+  h1{font-size:2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="#">💡 Angazake <span>PILOT</span></a>
+    <ul class="nav-links">
+      <li><a href="projects.html">🏗️ Projects</a></li>
+      <li><a href="roads.html">🛣️ Roads</a></li>
+      <li><a href="bills.html">🏛️ Parliament</a></li>
+      <li><a href="civic.html">📖 Civic Ed</a></li>
+      <li><a href="search.html">🔍 Search</a></li>
+      <li><a href="whatsapp.html">💬 WhatsApp</a></li>
+      <li><a href="#bursary">Bursary</a></li>
+      <li><a href="report.html">📸 Report</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div id="dbStatus" class="db-status connecting"><div class="db-dot"></div> <span>Connecting…</span></div>
+      <a href="report.html" class="nav-cta">📸 Report</a>
+      <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html" onclick="toggleMobileMenu()">🏠 Home</a>
+    <a href="projects.html" onclick="toggleMobileMenu()">🏗️ Projects</a>
+    <a href="roads.html" onclick="toggleMobileMenu()">🛣️ Roads</a>
+    <a href="bills.html" onclick="toggleMobileMenu()">🏛️ Parliament & Bills</a>
+    <a href="civic.html" onclick="toggleMobileMenu()">📖 Civic Education</a>
+    <a href="search.html" onclick="toggleMobileMenu()">🔍 Global Search</a>
+    <a href="whatsapp.html" onclick="toggleMobileMenu()">💬 WhatsApp Bot</a>
+    <a href="#bursary" onclick="toggleMobileMenu()">📚 Bursary Register</a>
+    <a href="report.html" onclick="toggleMobileMenu()">📸 Report a Project</a>
+    <a href="about.html" onclick="toggleMobileMenu()">ℹ️ About Angazake</a>
+    <div class="mobile-menu-wards">
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;padding:8px 0 4px">Ward Dashboards</div>
+      <a href="kivaa.html" onclick="toggleMobileMenu()">📍 Kivaa Ward</a>
+      <a href="masinga-central.html" onclick="toggleMobileMenu()">📍 Masinga Central</a>
+      <a href="ndithini.html" onclick="toggleMobileMenu()">📍 Ndithini Ward</a>
+      <a href="ekalakala.html" onclick="toggleMobileMenu()">📍 Ekalakala Ward</a>
+      <a href="muthesya.html" onclick="toggleMobileMenu()">📍 Muthesya Ward</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-pill">Masinga Sub-County Pilot — 2026</div>
+  <h1>Angazake.<br/><em>Wazi. Sasa. Kwa Wote.</em></h1>
+  <p class="hero-sub">Kenya's first sub-county accountability platform. Track every CDF project, bursary, road and promise in real time — on WhatsApp, website and app.</p>
+  <div class="hero-actions">
+    <a href="#bursary" class="btn-primary">📚 Check Bursary Status</a>
+    <a href="search.html" class="btn-secondary">🔍 Search All Records</a>
+    <a href="report.html" class="btn-secondary">📸 Report a Project</a>
+    <a href="whatsapp.html" class="btn-secondary">💬 Try on WhatsApp</a>
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">~65K</div><div class="stat-label">Registered voters</div></div>
+    <div class="stat"><div class="stat-num" id="statTrackers">21</div><div class="stat-label">Accountability trackers</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Wards covered</div></div>
+    <div class="stat"><div class="stat-num" id="statProjects">—</div><div class="stat-label">Projects tracked</div></div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="channels" id="how">
+  <div class="section-inner">
+    <div class="section-tag">Three channels</div>
+    <div class="section-title">One platform. Three ways to access it.</div>
+    <p class="section-desc">One database powers everything. Website, WhatsApp, and app all show the same live verified data.</p>
+    <div class="channels-grid">
+      <div class="channel-card">
+        <div class="channel-icon">🌐</div>
+        <h3>Public Website</h3>
+        <ul>
+          <li>GPS project maps with full details</li>
+          <li>Ward-by-ward spending breakdowns</li>
+          <li>Searchable bursary public register</li>
+          <li>Contracts and audit report downloads</li>
+          <li>Ask Angaza AI in English, Swahili, Kikamba</li>
+        </ul>
+      </div>
+      <div class="channel-card">
+        <div class="channel-icon">💬</div>
+        <h3>WhatsApp Bot</h3>
+        <ul>
+          <li>Menu-driven or natural language queries</li>
+          <li>Bursary lookup by name or admission no.</li>
+          <li>Submit stalled project report and photo</li>
+          <li>Ward-specific weekly update alerts</li>
+          <li>USSD and SMS fallback for feature phones</li>
+        </ul>
+      </div>
+      <div class="channel-card">
+        <div class="channel-icon">📲</div>
+        <h3>Mobile App</h3>
+        <ul>
+          <li>Works offline without internet</li>
+          <li>GPS and photo citizen reporting</li>
+          <li>Push notifications by ward</li>
+          <li>Public users: view, search, report</li>
+          <li>Admin users: enter and update projects</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRACKERS -->
+<section class="trackers" id="trackers">
+  <div class="section-inner">
+    <div class="section-tag">What we track</div>
+    <div class="section-title">21 accountability trackers. All live.</div>
+    <p class="section-desc">Every project entered auto-populates the right tracker. CDF, MCA, County, National Govt and Donors all classified by source.</p>
+    <div class="trackers-grid" id="trackersGrid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- WARDS -->
+<section id="wards">
+  <div class="section-inner">
+    <div class="section-tag">Coverage</div>
+    <div class="section-title">All 5 wards. Every shilling.</div>
+    <p class="section-desc">Each ward has its own dashboard showing all projects, spending, bursaries, roads, water and health.</p>
+    <div class="wards-grid">
+      <a href="kivaa.html" style="text-decoration:none;color:inherit"><div class="ward-card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+        <div class="ward-voters">~17.5K</div>
+        <div class="ward-name">Kivaa</div>
+        <span class="ward-badge mustwin">Must Win</span>
+        <div style="font-size:0.75rem;color:#6b7280;margin-top:8px">Hon. Alphonce Mutinda →</div>
+      </div></a>
+      <a href="masinga-central.html" style="text-decoration:none;color:inherit"><div class="ward-card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+        <div class="ward-voters">~17.5K</div>
+        <div class="ward-name">Masinga Central</div>
+        <span class="ward-badge mustwin">Must Win</span>
+        <div style="font-size:0.75rem;color:#6b7280;margin-top:8px">Hon. Joshua Kiilu Mwonga →</div>
+      </div></a>
+      <a href="ndithini.html" style="text-decoration:none;color:inherit"><div class="ward-card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+        <div class="ward-voters">~11.4K</div>
+        <div class="ward-name">Ndithini</div>
+        <span class="ward-badge consolidate">Consolidate</span>
+        <div style="font-size:0.75rem;color:#6b7280;margin-top:8px">Hon. Paul Musila →</div>
+      </div></a>
+      <a href="ekalakala.html" style="text-decoration:none;color:inherit"><div class="ward-card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+        <div class="ward-voters">~10.7K</div>
+        <div class="ward-name">Ekalakala</div>
+        <span class="ward-badge consolidate">Consolidate</span>
+        <div style="font-size:0.75rem;color:#6b7280;margin-top:8px">Hon. Stephen Mwanthi →</div>
+      </div></a>
+      <a href="muthesya.html" style="text-decoration:none;color:inherit"><div class="ward-card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'">
+        <div class="ward-voters">~7.9K</div>
+        <div class="ward-name">Muthesya</div>
+        <span class="ward-badge defend">Defend</span>
+        <div style="font-size:0.75rem;color:#6b7280;margin-top:8px">Hon. Daniel Musyoka Muindi →</div>
+      </div></a>
+    </div>
+  </div>
+</section>
+
+<!-- BURSARY -->
+<section class="bursary" id="bursary">
+  <div class="section-inner">
+    <div class="section-tag">Most-used feature</div>
+    <div class="section-title">Find any bursary in seconds.</div>
+    <p class="section-desc">Every bursary is on the public register. Search by name, admission number, school or ward.</p>
+    <div class="bursary-box">
+      <div class="bursary-header">
+        <div>
+          <h3>📚 Bursary Register</h3>
+          <p>Masinga Sub-County CDF — 2025/2026</p>
+        </div>
+      </div>
+      <div class="bursary-search-row">
+        <input id="bursaryInput" type="text" placeholder="Search by name, admission no., school or ward…" />
+        <button id="bursaryBtn" onclick="searchBursary()">Search</button>
+      </div>
+      <div class="bursary-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Admission No.</th>
+              <th>School</th>
+              <th>Ward</th>
+              <th>Term / Year</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="bursaryResults">
+            <tr><td colspan="7" class="bursary-empty"><strong>Ready to search</strong>Type a name, admission number, school or ward above and press Search.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="bursary-hint">💬 Can't find a record? Send the name to the WhatsApp bot for a deeper lookup.</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHATSAPP -->
+<section class="whatsapp-section" id="whatsapp">
+  <div class="section-inner">
+    <div class="section-tag" style="color:#9dd5b6">Try it now</div>
+    <div class="section-title">Try Angazake on WhatsApp right now.</div>
+    <div class="wa-box">
+      <div>
+        <div class="wa-number">+254 700 000 000</div>
+        <p style="color:#9ca3af;font-size:0.85rem;margin-top:6px">No download. No sign-up. Works on any phone. Bot launching on registration.</p>
+        <div class="wa-commands">
+          <span class="wa-cmd">HABARI → Main menu</span>
+          <span class="wa-cmd">BURSARY → Student lookup</span>
+          <span class="wa-cmd">PROJECTS → Find projects</span>
+          <span class="wa-cmd">REPORT → Flag a project</span>
+          <span class="wa-cmd">WARD → Ward dashboard</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">
+        <a href="https://wa.me/254700000000?text=HABARI" target="_blank" class="wa-cta">💬 Open WhatsApp</a>
+      <a href="whatsapp.html" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:14px 24px;border-radius:10px;font-weight:600;font-size:0.92rem;text-decoration:none;transition:background .2s">📖 See All Commands</a>
+        <a href="whatsapp.html" style="color:#9dd5b6;font-size:0.82rem;text-align:center">See all commands →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">💡 Angazake</div>
+      <p class="footer-desc">Kenya's sub-county accountability platform. Wazi. Sasa. Kwa Wote. Piloting in Masinga Sub-County, Machakos County — 2026.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a href="projects.html">Projects Tracker</a>
+      <a href="roads.html">Roads Tracker</a>
+      <a href="bills.html">Parliament & Bills</a>
+      <a href="civic.html">📖 Civic Education</a>
+      <a href="promises.html">Promises Tracker</a>
+      <a href="search.html">Global Search</a>
+      <a href="report.html">Report a Project</a>
+      <a href="whatsapp.html">WhatsApp Bot</a>
+    </div>
+    <div class="footer-col">
+      <h4>Wards</h4>
+      <a href="kivaa.html">Kivaa Ward</a>
+      <a href="masinga-central.html">Masinga Central</a>
+      <a href="ndithini.html">Ndithini Ward</a>
+      <a href="ekalakala.html">Ekalakala Ward</a>
+      <a href="muthesya.html">Muthesya Ward</a>
+    </div>
+    <div class="footer-col">
+      <h4>About</h4>
+      <a href="about.html">About Angazake</a>
+      <a href="about.html#contact">Contact Us</a>
+      <a href="about.html">Partner with us</a>
+      <a href="#bursary">Bursary Register</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Angazake — Kenya's Sub-County Accountability Platform · Wazi. Sasa. Kwa Wote.</span>
+    <span style="display:flex;gap:16px;align-items:center">
+      <span>#Angazake · #Wazi2027</span>
+      <a href="admin.html" style="color:#374151;font-size:0.7rem;text-decoration:none">⚙</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+// ── SUPABASE SETUP ──────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://awbozblyodzinzfhybtg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3Ym96Ymx5b2R6aW56Zmh5YnRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNTg3NzIsImV4cCI6MjA5MzkzNDc3Mn0.l6Gm9RSRbBMirGvff1hU2xgTxY6f0oEHPbSaBN6ORxs';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── TRACKER CONFIG ──────────────────────────────────────────────────────────
+const TRACKERS = [
+  { emoji:'💰', name:'CDF Projects',       table:'projects',          filter:null,                    link:'projects.html' },
+  { emoji:'🏥', name:'Health Facilities',  table:'health_facilities', filter:null,                    link:'search.html?q=health' },
+  { emoji:'🛣️', name:'Roads',             table:'Roads',             filter:null,                    link:'roads.html' },
+  { emoji:'📚', name:'Bursaries',         table:'bursaries',         filter:null,                    link:'#bursary' },
+  { emoji:'🎓', name:'Sponsored Students', table:'bursaries',        filter:{status:'disbursed'},     link:'#bursary' },
+  { emoji:'🏫', name:'Schools & TVETs',    table:'schools',           filter:null,                    link:'search.html?q=school' },
+  { emoji:'💧', name:'Water Projects',     table:'water_projects',    filter:null,                    link:'search.html?q=water' },
+  { emoji:'🏪', name:'Markets',           table:'markets',           filter:null,                    link:'search.html?q=market' },
+  { emoji:'👥', name:'Chamas & SACCOs',   table:'chamas_saccos',     filter:null,                    link:'search.html?q=chama' },
+  { emoji:'👷', name:'Staff & Workers',   table:'staff',             filter:null,                    link:'about.html' },
+  { emoji:'⚡', name:'Electrification',   table:'electrification',   filter:null,                    link:'search.html?q=electrification' },
+  { emoji:'🔒', name:'Security Projects', table:'security_projects', filter:null,                    link:'search.html?q=security' },
+  { emoji:'⚽', name:'Sports & Clubs',    table:'sports_clubs',      filter:null,                    link:'search.html?q=sports' },
+  { emoji:'🌱', name:'Climate & Env.',    table:'climate_projects',  filter:null,                    link:'search.html?q=climate' },
+  { emoji:'🤝', name:'Donations',         table:'donations',         filter:null,                    link:'search.html?q=donation' },
+  { emoji:'🏘️', name:'MCA Projects',     table:'mca_projects',      filter:null,                    link:'projects.html' },
+  { emoji:'🏛️', name:'National Govt',    table:'national_projects', filter:null,                    link:'projects.html' },
+  { emoji:'📋', name:'Contracts & Audits',table:'contracts',         filter:null,                    link:'search.html?q=contract' },
+  { emoji:'🤝', name:'Promises Tracker',  table:'promises',          filter:null,                    link:'search.html?q=promise' },
+  { emoji:'🗺️', name:'County Projects',  table:'county_projects',   filter:null,                    link:'projects.html' },
+  { emoji:'📊', name:'Citizen Reports',   table:'citizen_reports',   filter:null,                    link:'report.html' },
+];
+
+// ── DB STATUS INDICATOR ─────────────────────────────────────────────────────
+function setDbStatus(state) {
+  const el = document.getElementById('dbStatus');
+  const labels = { connected:'● Live data', connecting:'Connecting…', error:'Offline' };
+  el.className = `db-status ${state}`;
+  el.innerHTML = `<div class="db-dot"></div> <span>${labels[state]}</span>`;
+}
+
+// ── RENDER TRACKER GRID ─────────────────────────────────────────────────────
+function renderTrackerGrid(counts = {}) {
+  const grid = document.getElementById('trackersGrid');
+  grid.innerHTML = TRACKERS.map((t, i) => {
+    const count = counts[i] !== undefined ? counts[i] : '—';
+    const isLink = t.link && t.link !== '#';
+    const tag = isLink ? `a href="${t.link}"` : 'div';
+    const closeTag = isLink ? 'a' : 'div';
+    return `
+      <${tag} class="tracker-card" style="${isLink ? 'text-decoration:none;cursor:pointer' : ''}">
+        <div class="tracker-emoji">${t.emoji}</div>
+        <div class="tracker-count" id="tc${i}">${count}</div>
+        <div class="tracker-name">${t.name}</div>
+        ${isLink ? '<div style="font-size:0.7rem;color:rgba(255,255,255,0.5);margin-top:2px">View →</div>' : ''}
+      </${closeTag}>`;
+  }).join('');
+}
+
+// ── LOAD TRACKER COUNTS ─────────────────────────────────────────────────────
+async function loadTrackerCounts() {
+  renderTrackerGrid(); // render skeleton first
+
+  let totalProjects = 0;
+  let connected = false;
+
+  for (let i = 0; i < TRACKERS.length; i++) {
+    const t = TRACKERS[i];
+    try {
+      let query = db.from(t.table).select('*', { count: 'exact', head: true });
+      if (t.filter) {
+        for (const [col, val] of Object.entries(t.filter)) {
+          query = query.eq(col, val);
+        }
+      }
+      const { count, error } = await query;
+      const el = document.getElementById(`tc${i}`);
+      if (!error && el) {
+        el.textContent = count ?? 0;
+        if (t.table === 'projects' && !t.filter) totalProjects = count ?? 0;
+        connected = true;
+      }
+    } catch(e) {
+      // leave as —
+    }
+  }
+
+  if (connected) {
+    setDbStatus('connected');
+    if (totalProjects > 0) document.getElementById('statProjects').textContent = totalProjects;
+  } else {
+    setDbStatus('error');
+  }
+}
+
+// ── BURSARY SEARCH ──────────────────────────────────────────────────────────
+// Columns: id, created_at, student_name, school, ward, admission, amount,
+//          term, year, status, course, institution_type
+async function searchBursary() {
+  const input = document.getElementById('bursaryInput');
+  const btn = document.getElementById('bursaryBtn');
+  const tbody = document.getElementById('bursaryResults');
+  const q = input.value.trim();
+
+  if (!q) {
+    input.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Searching…';
+  tbody.innerHTML = `<tr><td colspan="7" class="bursary-empty">Searching database…</td></tr>`;
+
+  try {
+    // Search each column separately and merge results
+    const searches = await Promise.all([
+      db.from('bursaries').select('student_name, school, admission_no, ward, amount, term, year, status, course, institution_type').ilike('student_name', `%${q}%`).limit(50),
+      db.from('bursaries').select('student_name, school, admission_no, ward, amount, term, year, status, course, institution_type').ilike('admission_no', `%${q}%`).limit(50),
+      db.from('bursaries').select('student_name, school, admission_no, ward, amount, term, year, status, course, institution_type').ilike('school', `%${q}%`).limit(50),
+      db.from('bursaries').select('student_name, school, admission_no, ward, amount, term, year, status, course, institution_type').ilike('ward', `%${q}%`).limit(50),
+    ]);
+
+    // Check for errors
+    const firstError = searches.find(s => s.error);
+    if (firstError) {
+      console.error('Supabase error:', JSON.stringify(firstError.error));
+      throw firstError.error;
+    }
+
+    // Merge and deduplicate results by student_name + admission_no
+    const seen = new Set();
+    const merged = [];
+    for (const s of searches) {
+      for (const row of (s.data || [])) {
+        const key = `${row.student_name}-${row.admission_no}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          merged.push(row);
+        }
+      }
+    }
+    const data = merged.sort((a, b) => (a.student_name || '').localeCompare(b.student_name || ''));
+    const error = null;
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="7" class="bursary-empty">
+          <strong>No record found for "${q}"</strong>
+          Try a different spelling, admission number, school or ward. Or send the name to the WhatsApp bot.
+        </td></tr>`;
+    } else {
+      tbody.innerHTML = data.map(r => {
+        const statusClass = {
+          approved:  'status-approved',
+          pending:   'status-pending',
+          rejected:  'status-rejected',
+          disbursed: 'status-disbursed'
+        }[(r.status)?.toLowerCase()] || 'status-pending';
+        const amount = r.amount ? `KES ${Number(r.amount).toLocaleString()}` : '—';
+        return `
+          <tr>
+            <td><strong>${r.student_name || '—'}</strong></td>
+            <td>${r.admission_no || '—'}</td>
+            <td>${r.school || '—'}</td>
+            <td>${r.ward || '—'}</td>
+            <td>${r.term || '—'} / ${r.year || '—'}</td>
+            <td>${amount}</td>
+            <td><span class="status-badge ${statusClass}">${r.status || 'Pending'}</span></td>
+          </tr>`;
+      }).join('');
+    }
+  } catch (err) {
+    tbody.innerHTML = `
+      <tr><td colspan="7" class="bursary-empty">
+        <strong>Could not reach database</strong>
+        Please check your connection and try again, or use the WhatsApp bot.
+      </td></tr>`;
+    console.error('Bursary search error:', err);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Search';
+}
+
+// Allow Enter key to trigger search
+document.getElementById('bursaryInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchBursary();
+});
+
+// ── MOBILE MENU ──────────────────────────────────────────────────────────────
+function toggleMobileMenu(){
+  const menu=document.getElementById('mobileMenu');
+  const btn=document.getElementById('hamburger');
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  setDbStatus('connecting');
+  loadTrackerCounts();
+});
+</script>
+</body>
+</html>
